@@ -14,6 +14,10 @@ export class BrowserSession {
         return this.page;
     }
 
+    hasPage(): boolean {
+        return !!this.page;
+    }
+
     async close(): Promise<void> {
         await this.browser?.close();
     }

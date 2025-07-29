@@ -8,6 +8,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { BrowserSession } from './lib/browser.js';
 import { navigateTool } from './tools/navigate.js';
+import { screenshotTool } from './tools/screenshot.js';
 
 // Create browser session
 const browserSession = new BrowserSession();
@@ -25,38 +26,42 @@ const server = new Server(
     }
 );
 
+// Define tools array
+const tools = [navigateTool, screenshotTool];
+
 // Register tools
 server.setRequestHandler(
     ListToolsRequestSchema,
     async (): Promise<ListToolsResult> => ({
-        tools: [
-            {
-                name: navigateTool.name,
-                description: navigateTool.description,
-                inputSchema: navigateTool.inputSchema,
-            },
-        ],
+        tools: tools.map(tool => ({
+            name: tool.name,
+            description: tool.description,
+            inputSchema: tool.inputSchema,
+        })),
     })
 );
 
 server.setRequestHandler(
     CallToolRequestSchema,
     async (request): Promise<CallToolResult> => {
-        console.error(`Received tool call: ${request.params.name}`);
-        if (request.params.name === 'navigate') {
-            try {
-                const result = await navigateTool.handler(
-                    browserSession,
-                    request.params.arguments as { url: string }
-                );
-                console.error(`Tool call completed successfully`);
-                return result;
-            } catch (error) {
-                console.error(`Tool call failed:`, error);
-                throw error;
-            }
+        console.log(`Received tool call: ${request.params.name}`);
+
+        const tool = tools.find(t => t.name === request.params.name);
+        if (!tool) {
+            throw new Error(`Unknown tool: ${request.params.name}`);
         }
-        throw new Error(`Unknown tool: ${request.params.name}`);
+
+        try {
+            const result = await tool.handler(
+                browserSession,
+                request.params.arguments as any
+            );
+            console.info(`Tool call completed successfully`);
+            return result;
+        } catch (error) {
+            console.error(`Tool call failed:`, error);
+            throw error;
+        }
     }
 );
 
