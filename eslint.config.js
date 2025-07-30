@@ -27,6 +27,16 @@ export default [
         },
     },
     {
+        files: ['src/tools/**/*.ts'],
+        languageOptions: {
+            globals: {
+                window: 'readonly',
+                document: 'readonly',
+                HTMLElement: 'readonly',
+            },
+        },
+    },
+    {
         ignores: ['dist/**', 'node_modules/**'],
     },
 ];

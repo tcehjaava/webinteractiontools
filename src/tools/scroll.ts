@@ -147,24 +147,30 @@ export const scrollDirectionTool = {
                     resultText = `Scrolled down ${amount}px`;
                     break;
                 case 'top':
-                    await page.evaluate(({ smooth }) => {
-                        // @ts-expect-error - browser context has DOM globals
-                        window.scrollTo({
-                            top: 0,
-                            behavior: smooth ? 'smooth' : 'auto',
-                        });
-                    }, { smooth });
+                    await page.evaluate(
+                        ({ smooth }) => {
+                            // @ts-expect-error - browser context has DOM globals
+                            window.scrollTo({
+                                top: 0,
+                                behavior: smooth ? 'smooth' : 'auto',
+                            });
+                        },
+                        { smooth }
+                    );
                     resultText = 'Scrolled to top of page';
                     break;
                 case 'bottom':
-                    await page.evaluate(({ smooth }) => {
-                        // @ts-expect-error - browser context has DOM globals
-                        window.scrollTo({
+                    await page.evaluate(
+                        ({ smooth }) => {
                             // @ts-expect-error - browser context has DOM globals
-                            top: document.body.scrollHeight,
-                            behavior: smooth ? 'smooth' : 'auto',
-                        });
-                    }, { smooth });
+                            window.scrollTo({
+                                // @ts-expect-error - browser context has DOM globals
+                                top: document.body.scrollHeight,
+                                behavior: smooth ? 'smooth' : 'auto',
+                            });
+                        },
+                        { smooth }
+                    );
                     resultText = 'Scrolled to bottom of page';
                     break;
             }

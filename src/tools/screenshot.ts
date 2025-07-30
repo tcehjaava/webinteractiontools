@@ -67,8 +67,8 @@ export const screenshotTool = {
             const scrollPercentage =
                 pageInfo.totalHeight > 0
                     ? Math.round(
-                        (pageInfo.scrollTop / pageInfo.totalHeight) * 100
-                    )
+                          (pageInfo.scrollTop / pageInfo.totalHeight) * 100
+                      )
                     : 0;
 
             const visibleTop = pageInfo.scrollTop;
@@ -76,8 +76,8 @@ export const screenshotTool = {
             const pagePercentageVisible =
                 pageInfo.totalHeight > 0
                     ? Math.round(
-                        (pageInfo.viewportHeight / pageInfo.totalHeight) * 100
-                    )
+                          (pageInfo.viewportHeight / pageInfo.totalHeight) * 100
+                      )
                     : 100;
 
             return {

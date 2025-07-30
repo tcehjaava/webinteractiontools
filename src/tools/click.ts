@@ -13,7 +13,8 @@ export const clickTextTool = {
             },
             occurrence: {
                 type: 'number',
-                description: 'Which occurrence to click if multiple matches (1-based)',
+                description:
+                    'Which occurrence to click if multiple matches (1-based)',
                 default: 1,
             },
             waitAfter: {
@@ -48,7 +49,7 @@ export const clickTextTool = {
                         // @ts-expect-error - browser context has DOM globals
                         document.querySelectorAll('*')
                     );
-                    
+
                     for (const element of elements) {
                         if (
                             // @ts-expect-error - element type is unknown in Node context
@@ -71,9 +72,13 @@ export const clickTextTool = {
                             }
                         }
                     }
-                    
+
                     // Count remaining matches
-                    for (let i = elements.indexOf(elements[matchCount]); i < elements.length; i++) {
+                    for (
+                        let i = elements.indexOf(elements[matchCount]);
+                        i < elements.length;
+                        i++
+                    ) {
                         if (
                             // @ts-expect-error - element type is unknown in Node context
                             elements[i].textContent &&
@@ -83,7 +88,7 @@ export const clickTextTool = {
                             matchCount++;
                         }
                     }
-                    
+
                     return {
                         clicked: false,
                         totalMatches: matchCount,
@@ -190,7 +195,8 @@ export const clickPositionTool = {
             if (elementInfo) {
                 resultText += `\nElement: <${elementInfo.tagName}`;
                 if (elementInfo.id) resultText += ` id="${elementInfo.id}"`;
-                if (elementInfo.className) resultText += ` class="${elementInfo.className}"`;
+                if (elementInfo.className)
+                    resultText += ` class="${elementInfo.className}"`;
                 resultText += '>';
                 if (elementInfo.text) {
                     resultText += `\nText: "${elementInfo.text}${elementInfo.text.length >= 50 ? '...' : ''}"`;
@@ -276,7 +282,8 @@ export const clickSelectorTool = {
             let resultText = `Clicked element matching selector: "${args.selector}"`;
             resultText += `\nElement: <${elementInfo.tagName}`;
             if (elementInfo.id) resultText += ` id="${elementInfo.id}"`;
-            if (elementInfo.className) resultText += ` class="${elementInfo.className}"`;
+            if (elementInfo.className)
+                resultText += ` class="${elementInfo.className}"`;
             resultText += '>';
             if (elementInfo.text) {
                 resultText += `\nText: "${elementInfo.text}${elementInfo.text.length >= 50 ? '...' : ''}"`;

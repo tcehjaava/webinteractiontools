@@ -9,18 +9,30 @@ import {
 import { BrowserSession } from './lib/browser.js';
 import { navigateTool } from './tools/navigate.js';
 import { screenshotTool } from './tools/screenshot.js';
-import { scrollToPositionTool, scrollDirectionTool, scrollToTextTool } from './tools/scroll.js';
-import { clickTextTool, clickPositionTool, clickSelectorTool } from './tools/click.js';
+import {
+    scrollToPositionTool,
+    scrollDirectionTool,
+    scrollToTextTool,
+} from './tools/scroll.js';
+import {
+    clickTextTool,
+    clickPositionTool,
+    clickSelectorTool,
+} from './tools/click.js';
+import { getElementsTool } from './tools/getElements.js';
 
-interface Tool<T = unknown> {
+interface Tool {
     name: string;
     description: string;
     inputSchema: {
         type: 'object';
-        properties?: Record<string, unknown>;
+        properties: Record<string, unknown>;
         required?: string[];
     };
-    handler: (session: BrowserSession, args: T) => Promise<CallToolResult>;
+    handler: (
+        session: BrowserSession,
+        args: Record<string, unknown>
+    ) => Promise<CallToolResult>;
 }
 
 const browserSession = new BrowserSession();
@@ -37,7 +49,17 @@ const server = new Server(
     }
 );
 
-const tools = [navigateTool, screenshotTool, scrollToPositionTool, scrollDirectionTool, scrollToTextTool, clickTextTool, clickPositionTool, clickSelectorTool] as const;
+const tools = [
+    navigateTool,
+    screenshotTool,
+    scrollToPositionTool,
+    scrollDirectionTool,
+    scrollToTextTool,
+    clickTextTool,
+    clickPositionTool,
+    clickSelectorTool,
+    getElementsTool,
+] as const;
 
 server.setRequestHandler(
     ListToolsRequestSchema,
@@ -65,7 +87,7 @@ server.setRequestHandler(
         }
 
         try {
-            const result = await (tool as any).handler(
+            const result = await (tool as Tool).handler(
                 browserSession,
                 request.params.arguments || {}
             );
