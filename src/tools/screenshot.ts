@@ -67,8 +67,8 @@ export const screenshotTool = {
             const scrollPercentage =
                 pageInfo.totalHeight > 0
                     ? Math.round(
-                          (pageInfo.scrollTop / pageInfo.totalHeight) * 100
-                      )
+                        (pageInfo.scrollTop / pageInfo.totalHeight) * 100
+                    )
                     : 0;
 
             const visibleTop = pageInfo.scrollTop;
@@ -76,8 +76,8 @@ export const screenshotTool = {
             const pagePercentageVisible =
                 pageInfo.totalHeight > 0
                     ? Math.round(
-                          (pageInfo.viewportHeight / pageInfo.totalHeight) * 100
-                      )
+                        (pageInfo.viewportHeight / pageInfo.totalHeight) * 100
+                    )
                     : 100;
 
             return {
@@ -89,12 +89,12 @@ export const screenshotTool = {
                     },
                     {
                         type: 'text' as const,
-                        text: `📸 Screenshot captured
-URL: ${url}
-Title: ${title}
-Viewport: ${viewport.width}x${viewport.height}px
-Scroll: ${pageInfo.scrollTop}px of ${pageInfo.totalHeight}px (${scrollPercentage}% down)
-Showing: ${visibleTop}-${visibleBottom}px (${pagePercentageVisible}% of total page)`,
+                        text: `Viewport metadata:
+  URL: ${url}
+  Title: ${title}
+  Viewport: ${viewport.width}x${viewport.height}px
+  Scroll: ${pageInfo.scrollTop}px of ${pageInfo.totalHeight}px (${scrollPercentage}% down)
+  Showing: ${visibleTop}-${visibleBottom}px (${pagePercentageVisible}% of total page)`,
                     },
                 ],
             };
