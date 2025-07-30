@@ -10,6 +10,7 @@ import { BrowserSession } from './lib/browser.js';
 import { navigateTool } from './tools/navigate.js';
 import { screenshotTool } from './tools/screenshot.js';
 import { scrollToPositionTool, scrollDirectionTool, scrollToTextTool } from './tools/scroll.js';
+import { clickTextTool, clickPositionTool, clickSelectorTool } from './tools/click.js';
 
 interface Tool<T = unknown> {
     name: string;
@@ -36,7 +37,7 @@ const server = new Server(
     }
 );
 
-const tools = [navigateTool, screenshotTool, scrollToPositionTool, scrollDirectionTool, scrollToTextTool] as const;
+const tools = [navigateTool, screenshotTool, scrollToPositionTool, scrollDirectionTool, scrollToTextTool, clickTextTool, clickPositionTool, clickSelectorTool] as const;
 
 server.setRequestHandler(
     ListToolsRequestSchema,

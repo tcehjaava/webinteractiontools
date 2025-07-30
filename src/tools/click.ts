@@ -1,0 +1,298 @@
+import type { BrowserSession } from '../lib/browser.js';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+
+export const clickTextTool = {
+    name: 'clickText',
+    description: 'Click on an element containing specific text',
+    inputSchema: {
+        type: 'object' as const,
+        properties: {
+            text: {
+                type: 'string',
+                description: 'Text to find and click',
+            },
+            occurrence: {
+                type: 'number',
+                description: 'Which occurrence to click if multiple matches (1-based)',
+                default: 1,
+            },
+            waitAfter: {
+                type: 'number',
+                description: 'Milliseconds to wait after click',
+                default: 1000,
+            },
+        },
+        required: ['text'],
+    },
+    async handler(
+        session: BrowserSession,
+        args: {
+            text: string;
+            occurrence?: number;
+            waitAfter?: number;
+        }
+    ): Promise<CallToolResult> {
+        console.log(`ClickText tool called with args:`, args);
+
+        try {
+            const page = await session.getPage();
+            console.log('Page obtained');
+
+            const occurrence = args.occurrence ?? 1;
+            const waitAfter = args.waitAfter ?? 1000;
+
+            const clicked = await page.evaluate(
+                ({ text, occurrence }) => {
+                    let matchCount = 0;
+                    const elements = Array.from(
+                        // @ts-expect-error - browser context has DOM globals
+                        document.querySelectorAll('*')
+                    );
+                    
+                    for (const element of elements) {
+                        if (
+                            // @ts-expect-error - element type is unknown in Node context
+                            element.textContent &&
+                            // @ts-expect-error - element type is unknown in Node context
+                            element.textContent.includes(text as string)
+                        ) {
+                            matchCount++;
+                            if (matchCount === occurrence) {
+                                // @ts-expect-error - element type is unknown in Node context
+                                element.click();
+                                return {
+                                    clicked: true,
+                                    totalMatches: matchCount,
+                                    // @ts-expect-error - element type is unknown in Node context
+                                    tagName: element.tagName,
+                                    // @ts-expect-error - element type is unknown in Node context
+                                    className: element.className,
+                                };
+                            }
+                        }
+                    }
+                    
+                    // Count remaining matches
+                    for (let i = elements.indexOf(elements[matchCount]); i < elements.length; i++) {
+                        if (
+                            // @ts-expect-error - element type is unknown in Node context
+                            elements[i].textContent &&
+                            // @ts-expect-error - element type is unknown in Node context
+                            elements[i].textContent.includes(text as string)
+                        ) {
+                            matchCount++;
+                        }
+                    }
+                    
+                    return {
+                        clicked: false,
+                        totalMatches: matchCount,
+                        tagName: null,
+                        className: null,
+                    };
+                },
+                { text: args.text, occurrence }
+            );
+
+            if (!clicked.clicked) {
+                if (clicked.totalMatches === 0) {
+                    throw new Error(
+                        `No element found containing text: "${args.text}"`
+                    );
+                } else {
+                    throw new Error(
+                        `Element occurrence ${occurrence} not found. Only ${clicked.totalMatches} matches found for text: "${args.text}"`
+                    );
+                }
+            }
+
+            await page.waitForTimeout(waitAfter);
+            console.info('Click completed');
+
+            return {
+                content: [
+                    {
+                        type: 'text' as const,
+                        text: `Clicked element containing: "${args.text}" (occurrence ${occurrence} of ${clicked.totalMatches})\nElement: <${clicked.tagName}${clicked.className ? ` class="${clicked.className}"` : ''}>`,
+                    },
+                ],
+            };
+        } catch (error) {
+            console.error('ClickText error:', error);
+            throw error;
+        }
+    },
+};
+
+export const clickPositionTool = {
+    name: 'clickPosition',
+    description: 'Click at specific coordinates on the page',
+    inputSchema: {
+        type: 'object' as const,
+        properties: {
+            x: {
+                type: 'number',
+                description: 'X coordinate to click',
+            },
+            y: {
+                type: 'number',
+                description: 'Y coordinate to click',
+            },
+            waitAfter: {
+                type: 'number',
+                description: 'Milliseconds to wait after click',
+                default: 1000,
+            },
+        },
+        required: ['x', 'y'],
+    },
+    async handler(
+        session: BrowserSession,
+        args: {
+            x: number;
+            y: number;
+            waitAfter?: number;
+        }
+    ): Promise<CallToolResult> {
+        console.log(`ClickPosition tool called with args:`, args);
+
+        try {
+            const page = await session.getPage();
+            console.log('Page obtained');
+
+            const waitAfter = args.waitAfter ?? 1000;
+
+            // Click at the specified coordinates
+            await page.mouse.click(args.x, args.y);
+
+            // Get element information at click position
+            const elementInfo = await page.evaluate(
+                ({ x, y }) => {
+                    // @ts-expect-error - browser context has DOM globals
+                    const element = document.elementFromPoint(x, y);
+                    if (element) {
+                        return {
+                            tagName: element.tagName,
+                            className: element.className,
+                            id: element.id,
+                            text: element.textContent?.substring(0, 50),
+                        };
+                    }
+                    return null;
+                },
+                { x: args.x, y: args.y }
+            );
+
+            await page.waitForTimeout(waitAfter);
+            console.info('Click completed');
+
+            let resultText = `Clicked at coordinates (${args.x}, ${args.y})`;
+            if (elementInfo) {
+                resultText += `\nElement: <${elementInfo.tagName}`;
+                if (elementInfo.id) resultText += ` id="${elementInfo.id}"`;
+                if (elementInfo.className) resultText += ` class="${elementInfo.className}"`;
+                resultText += '>';
+                if (elementInfo.text) {
+                    resultText += `\nText: "${elementInfo.text}${elementInfo.text.length >= 50 ? '...' : ''}"`;
+                }
+            }
+
+            return {
+                content: [
+                    {
+                        type: 'text' as const,
+                        text: resultText,
+                    },
+                ],
+            };
+        } catch (error) {
+            console.error('ClickPosition error:', error);
+            throw error;
+        }
+    },
+};
+
+export const clickSelectorTool = {
+    name: 'clickSelector',
+    description: 'Click element matching CSS selector',
+    inputSchema: {
+        type: 'object' as const,
+        properties: {
+            selector: {
+                type: 'string',
+                description: 'CSS selector of element to click',
+            },
+            waitAfter: {
+                type: 'number',
+                description: 'Milliseconds to wait after click',
+                default: 1000,
+            },
+        },
+        required: ['selector'],
+    },
+    async handler(
+        session: BrowserSession,
+        args: {
+            selector: string;
+            waitAfter?: number;
+        }
+    ): Promise<CallToolResult> {
+        console.log(`ClickSelector tool called with args:`, args);
+
+        try {
+            const page = await session.getPage();
+            console.log('Page obtained');
+
+            const waitAfter = args.waitAfter ?? 1000;
+
+            const elementInfo = await page.evaluate(
+                ({ selector }) => {
+                    // @ts-expect-error - browser context has DOM globals
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        element.click();
+                        return {
+                            found: true,
+                            tagName: element.tagName,
+                            className: element.className,
+                            id: element.id,
+                            text: element.textContent?.substring(0, 50),
+                        };
+                    }
+                    return { found: false };
+                },
+                { selector: args.selector }
+            );
+
+            if (!elementInfo.found) {
+                throw new Error(
+                    `No element found matching selector: "${args.selector}"`
+                );
+            }
+
+            await page.waitForTimeout(waitAfter);
+            console.info('Click completed');
+
+            let resultText = `Clicked element matching selector: "${args.selector}"`;
+            resultText += `\nElement: <${elementInfo.tagName}`;
+            if (elementInfo.id) resultText += ` id="${elementInfo.id}"`;
+            if (elementInfo.className) resultText += ` class="${elementInfo.className}"`;
+            resultText += '>';
+            if (elementInfo.text) {
+                resultText += `\nText: "${elementInfo.text}${elementInfo.text.length >= 50 ? '...' : ''}"`;
+            }
+
+            return {
+                content: [
+                    {
+                        type: 'text' as const,
+                        text: resultText,
+                    },
+                ],
+            };
+        } catch (error) {
+            console.error('ClickSelector error:', error);
+            throw error;
+        }
+    },
+};
