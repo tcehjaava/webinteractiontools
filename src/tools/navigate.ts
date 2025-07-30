@@ -13,18 +13,21 @@ export const navigateTool = {
             },
             timeout: {
                 type: 'number',
-                description: 'Navigation timeout in milliseconds (default: 30000ms)',
+                description:
+                    'Navigation timeout in milliseconds (default: 30000ms)',
                 minimum: 1000,
                 maximum: 120000,
                 default: 30000,
             },
             waitForSelector: {
                 type: 'string',
-                description: 'Optional CSS selector to wait for before considering navigation complete',
+                description:
+                    'Optional CSS selector to wait for before considering navigation complete',
             },
             waitUntil: {
                 type: 'string',
-                description: 'When to consider navigation succeeded (default: "domcontentloaded")',
+                description:
+                    'When to consider navigation succeeded (default: "domcontentloaded")',
                 enum: ['load', 'domcontentloaded', 'networkidle'],
                 default: 'domcontentloaded',
             },
@@ -33,7 +36,7 @@ export const navigateTool = {
     },
     async handler(
         session: BrowserSession,
-        args: { 
+        args: {
             url: string;
             timeout?: number;
             waitForSelector?: string;
@@ -48,15 +51,17 @@ export const navigateTool = {
 
             const timeout = args.timeout ?? 30000;
             const waitUntil = args.waitUntil ?? 'domcontentloaded';
-            
-            console.log(`Navigating with timeout: ${timeout}ms, waitUntil: ${waitUntil}`);
-            
+
+            console.log(
+                `Navigating with timeout: ${timeout}ms, waitUntil: ${waitUntil}`
+            );
+
             await page.goto(args.url, {
                 waitUntil: waitUntil as any,
                 timeout: timeout,
             });
             console.info('Navigation completed');
-            
+
             // Wait for specific selector if provided
             if (args.waitForSelector) {
                 console.log(`Waiting for selector: ${args.waitForSelector}`);
@@ -65,11 +70,13 @@ export const navigateTool = {
                         timeout: Math.min(timeout / 2, 10000), // Use half the timeout or 10s max
                     });
                     console.log('Selector found');
-                } catch (error) {
-                    console.warn(`Warning: Selector "${args.waitForSelector}" not found, continuing...`);
+                } catch {
+                    console.warn(
+                        `Warning: Selector "${args.waitForSelector}" not found, continuing...`
+                    );
                 }
             }
-            
+
             // Always wait a bit for dynamic content to stabilize
             await page.waitForTimeout(2000);
             console.log('Additional stabilization wait completed');
