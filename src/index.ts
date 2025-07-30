@@ -9,7 +9,6 @@ import {
 import { BrowserSession } from './lib/browser.js';
 import { navigateTool } from './tools/navigate.js';
 import { screenshotTool } from './tools/screenshot.js';
-import { pageOverviewTool } from './tools/pageOverview.js';
 
 // Create browser session
 const browserSession = new BrowserSession();
@@ -28,7 +27,7 @@ const server = new Server(
 );
 
 // Define tools array
-const tools = [navigateTool, screenshotTool, pageOverviewTool];
+const tools = [navigateTool, screenshotTool];
 
 // Register tools
 server.setRequestHandler(

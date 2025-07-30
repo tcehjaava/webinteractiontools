@@ -1,33 +1,17 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { processScreenshot } from '../utils/image.js';
-import { getPageDimensions } from '../utils/page.js';
 
 export const screenshotTool = {
     name: 'screenshot',
-    description: 'Take a screenshot of the current page',
+    description: 'Take a screenshot of the current page viewport',
     inputSchema: {
         type: 'object' as const,
-        properties: {
-            fullPage: {
-                type: 'boolean',
-                description:
-                    'Capture the full scrollable page (true) or just the viewport (false)',
-                default: false,
-            },
-            provider: {
-                type: 'string',
-                description:
-                    'AI provider to optimize image sizing for (claude, gemini, openai, etc.). Defaults to 2000x2000px if not specified.',
-            },
-        },
+        properties: {},
         required: [],
     },
-    async handler(
-        session: BrowserSession,
-        args: { fullPage?: boolean; provider?: string }
-    ): Promise<CallToolResult> {
-        console.log(`Screenshot tool called, fullPage: ${args.fullPage}`);
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    async handler(session: BrowserSession, _args: {}): Promise<CallToolResult> {
+        console.log('Screenshot tool called');
 
         try {
             const page = await session.getPage();
@@ -35,11 +19,42 @@ export const screenshotTool = {
                 throw new Error('No page loaded. Use navigate tool first.');
             }
 
-            // Get page dimensions for debugging
-            await getPageDimensions(page);
+            // Get context BEFORE screenshot
+            const url = page.url();
+            const title = await page.title();
+            const viewport = page.viewportSize() || { width: 0, height: 0 };
+
+            // Get page dimensions and scroll position
+            const pageInfo = await page.evaluate(() => {
+                /* eslint-disable no-undef */
+                // @ts-expect-error - browser context has DOM globals
+                const body = document.body;
+                // @ts-expect-error - browser context has DOM globals
+                const html = document.documentElement;
+
+                const scrollHeight = Math.max(
+                    body.scrollHeight,
+                    body.offsetHeight,
+                    html.clientHeight,
+                    html.scrollHeight,
+                    html.offsetHeight
+                );
+
+                const scrollTop =
+                    // @ts-expect-error - browser context has window global
+                    window.pageYOffset || html.scrollTop || body.scrollTop || 0;
+                // @ts-expect-error - browser context has window global
+                const viewportHeight = window.innerHeight || html.clientHeight;
+                /* eslint-enable no-undef */
+
+                return {
+                    totalHeight: scrollHeight,
+                    scrollTop: scrollTop,
+                    viewportHeight: viewportHeight,
+                };
+            });
 
             const screenshotOptions = {
-                fullPage: args.fullPage === true,
                 type: 'png' as const,
             };
             console.log(
@@ -48,14 +63,27 @@ export const screenshotTool = {
 
             const screenshot = await page.screenshot(screenshotOptions);
 
-            // Process screenshot with provider-specific sizing
-            const { processedImage, wasResized, providerConfig } =
-                await processScreenshot(screenshot, args.provider);
-
-            const base64Image = processedImage.toString('base64');
+            const base64Image = screenshot.toString('base64');
             console.info(
                 `Screenshot captured, size: ${base64Image.length} chars`
             );
+
+            // Calculate scroll percentage and visible range
+            const scrollPercentage =
+                pageInfo.totalHeight > 0
+                    ? Math.round(
+                          (pageInfo.scrollTop / pageInfo.totalHeight) * 100
+                      )
+                    : 0;
+
+            const visibleTop = pageInfo.scrollTop;
+            const visibleBottom = pageInfo.scrollTop + pageInfo.viewportHeight;
+            const pagePercentageVisible =
+                pageInfo.totalHeight > 0
+                    ? Math.round(
+                          (pageInfo.viewportHeight / pageInfo.totalHeight) * 100
+                      )
+                    : 100;
 
             return {
                 content: [
@@ -66,7 +94,12 @@ export const screenshotTool = {
                     },
                     {
                         type: 'text' as const,
-                        text: `Screenshot captured (${args.fullPage ? 'full page' : 'viewport'})${wasResized ? ` - Resized to fit ${providerConfig.name} API limits (${providerConfig.maxImageDimension}x${providerConfig.maxImageDimension}px)` : ''}`,
+                        text: `📸 Screenshot captured
+URL: ${url}
+Title: ${title}
+Viewport: ${viewport.width}x${viewport.height}px
+Scroll: ${pageInfo.scrollTop}px of ${pageInfo.totalHeight}px (${scrollPercentage}% down)
+Showing: ${visibleTop}-${visibleBottom}px (${pagePercentageVisible}% of total page)`,
                     },
                 ],
             };
