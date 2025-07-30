@@ -66,12 +66,11 @@ export const navigateTool = {
             });
             console.info('Navigation completed');
 
-            // Wait for specific selector if provided
             if (args.waitForSelector) {
                 console.log(`Waiting for selector: ${args.waitForSelector}`);
                 try {
                     await page.waitForSelector(args.waitForSelector, {
-                        timeout: Math.min(timeout / 2, 10000), // Use half the timeout or 10s max
+                        timeout: Math.min(timeout / 2, 10000),
                     });
                     console.log('Selector found');
                 } catch {
@@ -81,7 +80,6 @@ export const navigateTool = {
                 }
             }
 
-            // Always wait a bit for dynamic content to stabilize
             await page.waitForTimeout(2000);
             console.log('Additional stabilization wait completed');
 

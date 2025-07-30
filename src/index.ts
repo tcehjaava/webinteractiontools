@@ -9,8 +9,8 @@ import {
 import { BrowserSession } from './lib/browser.js';
 import { navigateTool } from './tools/navigate.js';
 import { screenshotTool } from './tools/screenshot.js';
+import { scrollToPositionTool, scrollDirectionTool, scrollToTextTool } from './tools/scroll.js';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface Tool<T = unknown> {
     name: string;
     description: string;
@@ -22,10 +22,8 @@ interface Tool<T = unknown> {
     handler: (session: BrowserSession, args: T) => Promise<CallToolResult>;
 }
 
-// Create browser session
 const browserSession = new BrowserSession();
 
-// Initialize server
 const server = new Server(
     {
         name: 'websight',
@@ -38,10 +36,8 @@ const server = new Server(
     }
 );
 
-// Define tools array
-const tools = [navigateTool, screenshotTool] as const;
+const tools = [navigateTool, screenshotTool, scrollToPositionTool, scrollDirectionTool, scrollToTextTool] as const;
 
-// Register tools
 server.setRequestHandler(
     ListToolsRequestSchema,
     async (): Promise<ListToolsResult> => ({
@@ -68,7 +64,6 @@ server.setRequestHandler(
         }
 
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await (tool as any).handler(
                 browserSession,
                 request.params.arguments || {}
@@ -82,12 +77,10 @@ server.setRequestHandler(
     }
 );
 
-// Handle cleanup
 process.on('SIGINT', async () => {
     await browserSession.close();
     process.exit(0);
 });
 
-// Start server
 const transport = new StdioServerTransport();
 server.connect(transport);

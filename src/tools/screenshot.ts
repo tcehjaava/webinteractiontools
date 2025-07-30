@@ -19,14 +19,11 @@ export const screenshotTool = {
                 throw new Error('No page loaded. Use navigate tool first.');
             }
 
-            // Get context BEFORE screenshot
             const url = page.url();
             const title = await page.title();
             const viewport = page.viewportSize() || { width: 0, height: 0 };
 
-            // Get page dimensions and scroll position
             const pageInfo = await page.evaluate(() => {
-                /* eslint-disable no-undef */
                 // @ts-expect-error - browser context has DOM globals
                 const body = document.body;
                 // @ts-expect-error - browser context has DOM globals
@@ -45,7 +42,6 @@ export const screenshotTool = {
                     window.pageYOffset || html.scrollTop || body.scrollTop || 0;
                 // @ts-expect-error - browser context has window global
                 const viewportHeight = window.innerHeight || html.clientHeight;
-                /* eslint-enable no-undef */
 
                 return {
                     totalHeight: scrollHeight,
@@ -68,7 +64,6 @@ export const screenshotTool = {
                 `Screenshot captured, size: ${base64Image.length} chars`
             );
 
-            // Calculate scroll percentage and visible range
             const scrollPercentage =
                 pageInfo.totalHeight > 0
                     ? Math.round(
