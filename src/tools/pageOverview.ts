@@ -1,30 +1,19 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { processScreenshot } from '../utils/image.js';
-import { getPageMetadata, extractPageText } from '../utils/page.js';
+import { getPageMetadata } from '../utils/page.js';
 
 export const pageOverviewTool = {
     name: 'page_overview',
     description:
-        'Get a comprehensive overview of the current page including screenshots, metadata, and content analysis',
+        'Get a comprehensive overview of the current page including full page screenshot and metadata',
     inputSchema: {
         type: 'object' as const,
         properties: {
-            includeText: {
-                type: 'boolean',
-                description: 'Include extracted text content from the page',
-                default: true,
-            },
             includeMetadata: {
                 type: 'boolean',
                 description: 'Include page metadata (title, URL, dimensions)',
                 default: true,
-            },
-            maxTextLength: {
-                type: 'number',
-                description:
-                    'Maximum length of extracted text (0 for no limit)',
-                default: 10000,
             },
             provider: {
                 type: 'string',
@@ -37,9 +26,7 @@ export const pageOverviewTool = {
     async handler(
         session: BrowserSession,
         args: {
-            includeText?: boolean;
             includeMetadata?: boolean;
-            maxTextLength?: number;
             provider?: string;
         }
     ): Promise<CallToolResult> {
@@ -51,11 +38,7 @@ export const pageOverviewTool = {
                 throw new Error('No page loaded. Use navigate tool first.');
             }
 
-            const {
-                includeText = true,
-                includeMetadata = true,
-                maxTextLength = 10000,
-            } = args;
+            const { includeMetadata = true } = args;
             const content: any[] = [];
 
             // Collect page metadata
@@ -105,15 +88,6 @@ export const pageOverviewTool = {
                 overviewText += '\n';
             }
 
-            // Extract text content if requested
-            if (includeText) {
-                const extractedText = await extractPageText(
-                    page,
-                    maxTextLength
-                );
-                overviewText += '## Page Content (Text)\n\n';
-                overviewText += extractedText + '\n\n';
-            }
 
             overviewText += `## Screenshot Information\n`;
             overviewText += `- Full page screenshot captured\n`;
