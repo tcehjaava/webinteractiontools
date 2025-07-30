@@ -13,18 +13,21 @@ export const navigateTool = {
             },
             timeout: {
                 type: 'number',
-                description: 'Navigation timeout in milliseconds (default: 30000ms)',
+                description:
+                    'Navigation timeout in milliseconds (default: 30000ms)',
                 minimum: 1000,
                 maximum: 120000,
                 default: 30000,
             },
             waitForSelector: {
                 type: 'string',
-                description: 'Optional CSS selector to wait for before considering navigation complete',
+                description:
+                    'Optional CSS selector to wait for before considering navigation complete',
             },
             waitUntil: {
                 type: 'string',
-                description: 'When to consider navigation succeeded (default: "domcontentloaded")',
+                description:
+                    'When to consider navigation succeeded (default: "domcontentloaded")',
                 enum: ['load', 'domcontentloaded', 'networkidle'],
                 default: 'domcontentloaded',
             },
@@ -54,7 +57,11 @@ export const navigateTool = {
             );
 
             await page.goto(args.url, {
-                waitUntil: waitUntil as any,
+                waitUntil: waitUntil as
+                    | 'load'
+                    | 'domcontentloaded'
+                    | 'networkidle'
+                    | 'commit',
                 timeout: timeout,
             });
             console.info('Navigation completed');

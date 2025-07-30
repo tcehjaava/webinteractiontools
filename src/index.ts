@@ -10,6 +10,18 @@ import { BrowserSession } from './lib/browser.js';
 import { navigateTool } from './tools/navigate.js';
 import { screenshotTool } from './tools/screenshot.js';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface Tool<T = unknown> {
+    name: string;
+    description: string;
+    inputSchema: {
+        type: 'object';
+        properties?: Record<string, unknown>;
+        required?: string[];
+    };
+    handler: (session: BrowserSession, args: T) => Promise<CallToolResult>;
+}
+
 // Create browser session
 const browserSession = new BrowserSession();
 
@@ -27,7 +39,7 @@ const server = new Server(
 );
 
 // Define tools array
-const tools = [navigateTool, screenshotTool];
+const tools = [navigateTool, screenshotTool] as const;
 
 // Register tools
 server.setRequestHandler(
@@ -36,7 +48,11 @@ server.setRequestHandler(
         tools: tools.map(tool => ({
             name: tool.name,
             description: tool.description,
-            inputSchema: tool.inputSchema,
+            inputSchema: tool.inputSchema as {
+                type: 'object';
+                properties?: Record<string, unknown>;
+                required?: string[];
+            },
         })),
     })
 );
@@ -52,9 +68,10 @@ server.setRequestHandler(
         }
 
         try {
-            const result = await tool.handler(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = await (tool as any).handler(
                 browserSession,
-                request.params.arguments as any
+                request.params.arguments || {}
             );
             console.info(`Tool call completed successfully`);
             return result;
