@@ -1,10 +1,13 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { Logger } from '../lib/logger.js';
 
 const DEFAULT_ELEMENT_TYPE = 'clickable' as const;
 const DEFAULT_SCOPE = 'viewport' as const;
 const DEFAULT_PAGE = 1;
 const ELEMENTS_PER_PAGE = 20;
+
+const logger = new Logger('getElements');
 
 export const getElementsTool = {
     name: 'getElements',
@@ -40,11 +43,11 @@ export const getElementsTool = {
             page?: number;
         }
     ): Promise<CallToolResult> {
-        console.log(`GetElements tool called with args:`, args);
+        logger.info('Tool called', args);
 
         try {
             const page = await session.getPage();
-            console.log('Page obtained');
+            logger.debug('Page obtained');
 
             const elementType = args.type ?? 'clickable';
             const searchScope = args.scope ?? 'viewport';
@@ -216,7 +219,7 @@ export const getElementsTool = {
                 ],
             };
         } catch (error) {
-            console.error('GetElements error:', error);
+            logger.error('GetElements failed', error);
             throw error;
         }
     },

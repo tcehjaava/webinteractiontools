@@ -1,9 +1,12 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { Logger } from '../lib/logger.js';
 
 const DEFAULT_SELECTOR = 'body';
 const DEFAULT_CLEAN = true;
 const DEFAULT_VIEWPORT = false;
+
+const logger = new Logger('extractHTML');
 
 export const extractHTMLTool = {
     name: 'extractHTML',
@@ -36,11 +39,11 @@ export const extractHTMLTool = {
             viewport?: boolean;
         }
     ): Promise<CallToolResult> {
-        console.log(`ExtractHTML tool called with args:`, args);
+        logger.info('Tool called', args);
 
         try {
             const page = await session.getPage();
-            console.log('Page obtained');
+            logger.debug('Page obtained');
 
             const selector = args.selector ?? DEFAULT_SELECTOR;
             const clean = args.clean ?? true;
@@ -167,7 +170,7 @@ export const extractHTMLTool = {
                 ],
             };
         } catch (error) {
-            console.error('ExtractHTML error:', error);
+            logger.error('ExtractHTML failed', error);
             throw error;
         }
     },

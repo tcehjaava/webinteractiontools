@@ -1,9 +1,12 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { Logger } from '../lib/logger.js';
 
 const DEFAULT_WAIT_AFTER_CLICK = 1000;
 const DEFAULT_OCCURRENCE = 1;
 const TEXT_TRUNCATE_LENGTH = 50;
+
+const logger = new Logger('click');
 
 export const clickTextTool = {
     name: 'clickText',
@@ -37,11 +40,11 @@ export const clickTextTool = {
             waitAfter?: number;
         }
     ): Promise<CallToolResult> {
-        console.log(`ClickText tool called with args:`, args);
+        logger.info('ClickText called', args);
 
         try {
             const page = await session.getPage();
-            console.log('Page obtained');
+            logger.debug('Page obtained');
 
             const occurrence = args.occurrence ?? 1;
             const waitAfter = args.waitAfter ?? DEFAULT_WAIT_AFTER_CLICK;
@@ -109,7 +112,7 @@ export const clickTextTool = {
             }
 
             await page.waitForTimeout(waitAfter);
-            console.info('Click completed');
+            logger.info('Click completed');
 
             return {
                 content: [
@@ -120,7 +123,7 @@ export const clickTextTool = {
                 ],
             };
         } catch (error) {
-            console.error('ClickText error:', error);
+            logger.error('ClickText failed', error);
             throw error;
         }
     },
@@ -156,11 +159,11 @@ export const clickPositionTool = {
             waitAfter?: number;
         }
     ): Promise<CallToolResult> {
-        console.log(`ClickPosition tool called with args:`, args);
+        logger.info('ClickPosition called', args);
 
         try {
             const page = await session.getPage();
-            console.log('Page obtained');
+            logger.debug('Page obtained');
 
             const waitAfter = args.waitAfter ?? DEFAULT_WAIT_AFTER_CLICK;
 
@@ -185,7 +188,7 @@ export const clickPositionTool = {
             );
 
             await page.waitForTimeout(waitAfter);
-            console.info('Click completed');
+            logger.info('Click completed');
 
             let resultText = `Clicked at coordinates (${args.x}, ${args.y})`;
             if (elementInfo) {
@@ -208,7 +211,7 @@ export const clickPositionTool = {
                 ],
             };
         } catch (error) {
-            console.error('ClickPosition error:', error);
+            logger.error('ClickPosition failed', error);
             throw error;
         }
     },
@@ -239,11 +242,11 @@ export const clickSelectorTool = {
             waitAfter?: number;
         }
     ): Promise<CallToolResult> {
-        console.log(`ClickSelector tool called with args:`, args);
+        logger.info('ClickSelector called', args);
 
         try {
             const page = await session.getPage();
-            console.log('Page obtained');
+            logger.debug('Page obtained');
 
             const waitAfter = args.waitAfter ?? DEFAULT_WAIT_AFTER_CLICK;
 
@@ -272,7 +275,7 @@ export const clickSelectorTool = {
             }
 
             await page.waitForTimeout(waitAfter);
-            console.info('Click completed');
+            logger.info('Click completed');
 
             let resultText = `Clicked element matching selector: "${args.selector}"`;
             resultText += `\nElement: <${elementInfo.tagName}`;
@@ -293,7 +296,7 @@ export const clickSelectorTool = {
                 ],
             };
         } catch (error) {
-            console.error('ClickSelector error:', error);
+            logger.error('ClickSelector failed', error);
             throw error;
         }
     },

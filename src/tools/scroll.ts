@@ -1,5 +1,6 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { Logger } from '../lib/logger.js';
 
 const SCROLL_WAIT_TIME = {
     SMOOTH: 500,
@@ -8,6 +9,8 @@ const SCROLL_WAIT_TIME = {
 
 const DEFAULT_SMOOTH = true;
 const DEFAULT_SCROLL_AMOUNT = 500;
+
+const logger = new Logger('scroll');
 
 function formatScrollPercentage(scrollY: number, totalHeight: number, viewportHeight: number): string {
     const scrollableHeight = totalHeight - viewportHeight;
@@ -41,11 +44,11 @@ export const scrollToPositionTool = {
             smooth?: boolean;
         }
     ): Promise<CallToolResult> {
-        console.log(`ScrollToPosition tool called with args:`, args);
+        logger.info('ScrollToPosition called', args);
 
         try {
             const page = await session.getPage();
-            console.log('Page obtained');
+            logger.debug('Page obtained');
 
             const smooth = args.smooth ?? DEFAULT_SMOOTH;
 
@@ -70,7 +73,7 @@ export const scrollToPositionTool = {
                 };
             });
 
-            console.info('Scroll completed');
+            logger.info('Scroll completed');
 
             return {
                 content: [
@@ -81,7 +84,7 @@ export const scrollToPositionTool = {
                 ],
             };
         } catch (error) {
-            console.error('ScrollToPosition error:', error);
+            logger.error('ScrollToPosition failed', error);
             throw error;
         }
     },
@@ -119,11 +122,11 @@ export const scrollDirectionTool = {
             smooth?: boolean;
         }
     ): Promise<CallToolResult> {
-        console.log(`ScrollDirection tool called with args:`, args);
+        logger.info('ScrollDirection called', args);
 
         try {
             const page = await session.getPage();
-            console.log('Page obtained');
+            logger.debug('Page obtained');
 
             const smooth = args.smooth ?? DEFAULT_SMOOTH;
             const amount = args.amount ?? DEFAULT_SCROLL_AMOUNT;
@@ -191,7 +194,7 @@ export const scrollDirectionTool = {
                 };
             });
 
-            console.info('Scroll completed');
+            logger.info('Scroll completed');
 
             return {
                 content: [
@@ -202,7 +205,7 @@ export const scrollDirectionTool = {
                 ],
             };
         } catch (error) {
-            console.error('ScrollDirection error:', error);
+            logger.error('ScrollDirection failed', error);
             throw error;
         }
     },
@@ -233,39 +236,48 @@ export const scrollToTextTool = {
             smooth?: boolean;
         }
     ): Promise<CallToolResult> {
-        console.log(`ScrollToText tool called with args:`, args);
+        logger.info('ScrollToText called', args);
 
         try {
             const page = await session.getPage();
-            console.log('Page obtained');
+            logger.debug('Page obtained');
 
             const smooth = args.smooth ?? DEFAULT_SMOOTH;
 
-            const found = await page.evaluate(
+            const result = await page.evaluate(
                 ({ text, smooth }) => {
                     const elements = Array.from(
                         document.querySelectorAll('*')
                     );
+                    let matchCount = 0;
+                    let scrolledElement = null;
+                    
                     for (const element of elements) {
                         if (
                             element.textContent &&
                             element.textContent.includes(text)
                         ) {
-                            element.scrollIntoView({
-                                behavior: smooth ? 'smooth' : 'auto',
-                                block: 'center',
-                            });
-                            return true;
+                            matchCount++;
+                            if (!scrolledElement) {
+                                element.scrollIntoView({
+                                    behavior: smooth ? 'smooth' : 'auto',
+                                    block: 'center',
+                                });
+                                scrolledElement = {
+                                    tagName: element.tagName,
+                                    className: (element as HTMLElement).className,
+                                };
+                            }
                         }
                     }
-                    return false;
+                    return { found: matchCount > 0, matchCount, scrolledElement };
                 },
                 { text: args.text, smooth }
             );
 
-            if (!found) {
+            if (!result.found) {
                 throw new Error(
-                    `No element found containing text: "${args.text}"`
+                    `No element found containing text: "${args.text}". Searched through all page elements.`
                 );
             }
 
@@ -280,18 +292,18 @@ export const scrollToTextTool = {
                 };
             });
 
-            console.info('Scroll completed');
+            logger.info('Scroll completed');
 
             return {
                 content: [
                     {
                         type: 'text' as const,
-                        text: `Scrolled to element containing: "${args.text}"\nCurrent position: ${formatScrollPercentage(scrollPosition.y, scrollPosition.height, scrollPosition.viewportHeight)}`,
+                        text: `Scrolled to element containing: "${args.text}" (found ${result.matchCount} matches)\nElement: <${result.scrolledElement?.tagName}${result.scrolledElement?.className ? ` class="${result.scrolledElement.className}"` : ''}>\nCurrent position: ${formatScrollPercentage(scrollPosition.y, scrollPosition.height, scrollPosition.viewportHeight)}`,
                     },
                 ],
             };
         } catch (error) {
-            console.error('ScrollToText error:', error);
+            logger.error('ScrollToText failed', error);
             throw error;
         }
     },

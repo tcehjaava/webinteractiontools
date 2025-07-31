@@ -1,7 +1,10 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { Logger } from '../lib/logger.js';
 
 const SCREENSHOT_FORMAT = 'png' as const;
+
+const logger = new Logger('screenshot');
 
 export const screenshotTool = {
     name: 'screenshot',
@@ -13,7 +16,7 @@ export const screenshotTool = {
     },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-object-type
     async handler(session: BrowserSession, _args: {}): Promise<CallToolResult> {
-        console.log('Screenshot tool called');
+        logger.info('Tool called');
 
         try {
             const page = await session.getPage();
@@ -51,16 +54,12 @@ export const screenshotTool = {
             const screenshotOptions = {
                 type: SCREENSHOT_FORMAT,
             };
-            console.log(
-                `Screenshot options: ${JSON.stringify(screenshotOptions)}`
-            );
+            logger.debug('Taking screenshot', screenshotOptions);
 
             const screenshot = await page.screenshot(screenshotOptions);
 
             const base64Image = screenshot.toString('base64');
-            console.info(
-                `Screenshot captured, size: ${base64Image.length} chars`
-            );
+            logger.info('Screenshot captured', { size: `${base64Image.length} chars` });
 
             const scrollPercentage =
                 pageInfo.totalHeight > 0
@@ -97,7 +96,7 @@ export const screenshotTool = {
                 ],
             };
         } catch (error) {
-            console.error('Screenshot error:', error);
+            logger.error('Screenshot failed', error);
             throw error;
         }
     },

@@ -1,5 +1,6 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { Logger } from '../lib/logger.js';
 
 const NAVIGATION_TIMEOUT = {
     DEFAULT: 30000,
@@ -8,6 +9,8 @@ const NAVIGATION_TIMEOUT = {
 } as const;
 
 const DEFAULT_WAIT_UNTIL = 'domcontentloaded' as const;
+
+const logger = new Logger('navigate');
 
 export const navigateTool = {
     name: 'navigate',
@@ -51,18 +54,16 @@ export const navigateTool = {
             waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
         }
     ): Promise<CallToolResult> {
-        console.log(`Navigate tool called with URL: ${args.url}`);
+        logger.info('Tool called', args);
 
         try {
             const page = await session.getPage();
-            console.log('Page obtained');
+            logger.debug('Page obtained');
 
             const timeout = args.timeout ?? 30000;
             const waitUntil = args.waitUntil ?? 'domcontentloaded';
 
-            console.log(
-                `Navigating with timeout: ${timeout}ms, waitUntil: ${waitUntil}`
-            );
+            logger.info('Starting navigation', { timeout, waitUntil });
 
             await page.goto(args.url, {
                 waitUntil: waitUntil as
@@ -72,24 +73,22 @@ export const navigateTool = {
                     | 'commit',
                 timeout: timeout,
             });
-            console.info('Navigation completed');
+            logger.info('Navigation completed');
 
             if (args.waitForSelector) {
-                console.log(`Waiting for selector: ${args.waitForSelector}`);
+                logger.debug(`Waiting for selector: ${args.waitForSelector}`);
                 try {
                     await page.waitForSelector(args.waitForSelector, {
                         timeout: Math.min(timeout / 2, 10000),
                     });
-                    console.log('Selector found');
+                    logger.debug('Selector found');
                 } catch {
-                    console.warn(
-                        `Warning: Selector "${args.waitForSelector}" not found, continuing...`
-                    );
+                    logger.warn(`Selector "${args.waitForSelector}" not found, continuing`);
                 }
             }
 
             await page.waitForTimeout(2000);
-            console.log('Additional stabilization wait completed');
+            logger.debug('Additional stabilization wait completed');
 
             const title = await page.title();
             const currentUrl = page.url();
@@ -103,7 +102,7 @@ export const navigateTool = {
                 ],
             };
         } catch (error) {
-            console.error('Navigation error:', error);
+            logger.error('Navigation failed', error);
             throw error;
         }
     },
