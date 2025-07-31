@@ -9,6 +9,13 @@ const SCROLL_WAIT_TIME = {
 const DEFAULT_SMOOTH = true;
 const DEFAULT_SCROLL_AMOUNT = 500;
 
+function formatScrollPercentage(scrollY: number, totalHeight: number, viewportHeight: number): string {
+    const scrollableHeight = totalHeight - viewportHeight;
+    if (scrollableHeight <= 0) return 'Y=0 (0% of page)';
+    const percentage = Math.round((scrollY / scrollableHeight) * 100);
+    return `Y=${scrollY} (${percentage}% of page)`;
+}
+
 export const scrollToPositionTool = {
     name: 'scrollToPosition',
     description: 'Scroll to a specific Y coordinate on the page',
@@ -69,7 +76,7 @@ export const scrollToPositionTool = {
                 content: [
                     {
                         type: 'text' as const,
-                        text: `Scrolled to Y position: ${args.y}\nCurrent position: Y=${scrollPosition.y} (${Math.round((scrollPosition.y / (scrollPosition.height - scrollPosition.viewportHeight)) * 100)}% of page)`,
+                        text: `Scrolled to Y position: ${args.y}\nCurrent position: ${formatScrollPercentage(scrollPosition.y, scrollPosition.height, scrollPosition.viewportHeight)}`,
                     },
                 ],
             };
@@ -190,7 +197,7 @@ export const scrollDirectionTool = {
                 content: [
                     {
                         type: 'text' as const,
-                        text: `${resultText}\nCurrent position: Y=${scrollPosition.y} (${Math.round((scrollPosition.y / (scrollPosition.height - scrollPosition.viewportHeight)) * 100)}% of page)`,
+                        text: `${resultText}\nCurrent position: ${formatScrollPercentage(scrollPosition.y, scrollPosition.height, scrollPosition.viewportHeight)}`,
                     },
                 ],
             };
@@ -279,7 +286,7 @@ export const scrollToTextTool = {
                 content: [
                     {
                         type: 'text' as const,
-                        text: `Scrolled to element containing: "${args.text}"\nCurrent position: Y=${scrollPosition.y} (${Math.round((scrollPosition.y / (scrollPosition.height - scrollPosition.viewportHeight)) * 100)}% of page)`,
+                        text: `Scrolled to element containing: "${args.text}"\nCurrent position: ${formatScrollPercentage(scrollPosition.y, scrollPosition.height, scrollPosition.viewportHeight)}`,
                     },
                 ],
             };
