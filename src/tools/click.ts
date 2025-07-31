@@ -165,41 +165,58 @@ export const clickPositionTool = {
 
             const waitAfter = args.waitAfter ?? DEFAULT_WAIT_AFTER_CLICK;
 
-            // Click at the specified coordinates
-            await page.mouse.click(args.x, args.y);
-
-            // Get element information at click position
-            const elementInfo = await page.evaluate(
-                ({ x, y }) => {
+            const result = await page.evaluate(
+                ({ x, y, textTruncateLength }) => {
                     const element = document.elementFromPoint(x, y);
-                    if (element) {
+                    if (!element) {
                         return {
-                            tagName: element.tagName,
-                            className: element.className,
-                            id: element.id,
-                            text: element.textContent?.substring(
-                                0,
-                                TEXT_TRUNCATE_LENGTH
-                            ),
+                            clicked: false,
+                            reason: 'No element found at coordinates',
                         };
                     }
-                    return null;
+
+                    const elementInfo = {
+                        tagName: element.tagName,
+                        className: element.className,
+                        id: element.id,
+                        text: element.textContent?.substring(
+                            0,
+                            textTruncateLength
+                        ),
+                    };
+
+                    (element as HTMLElement).click();
+
+                    return {
+                        clicked: true,
+                        ...elementInfo,
+                    };
                 },
-                { x: args.x, y: args.y }
+                {
+                    x: args.x,
+                    y: args.y,
+                    textTruncateLength: TEXT_TRUNCATE_LENGTH,
+                }
             );
+
+            if (!result.clicked) {
+                throw new Error(
+                    `${result.reason} at coordinates (${args.x}, ${args.y})`
+                );
+            }
 
             await page.waitForTimeout(waitAfter);
             logger.info('Click completed');
 
             let resultText = `Clicked at coordinates (${args.x}, ${args.y})`;
-            if (elementInfo) {
-                resultText += `\nElement: <${elementInfo.tagName}`;
-                if (elementInfo.id) resultText += ` id="${elementInfo.id}"`;
-                if (elementInfo.className)
-                    resultText += ` class="${elementInfo.className}"`;
+            if ('tagName' in result) {
+                resultText += `\nElement: <${result.tagName}`;
+                if (result.id) resultText += ` id="${result.id}"`;
+                if (result.className)
+                    resultText += ` class="${result.className}"`;
                 resultText += '>';
-                if (elementInfo.text) {
-                    resultText += `\nText: "${elementInfo.text}${elementInfo.text.length >= 50 ? '...' : ''}"`;
+                if (result.text) {
+                    resultText += `\nText: "${result.text}${result.text.length >= TEXT_TRUNCATE_LENGTH ? '...' : ''}"`;
                 }
             }
 
@@ -251,30 +268,42 @@ export const clickSelectorTool = {
 
             const waitAfter = args.waitAfter ?? DEFAULT_WAIT_AFTER_CLICK;
 
-            const elementInfo = await page.evaluate(
-                ({ selector }) => {
+            const result = await page.evaluate(
+                ({ selector, textTruncateLength }) => {
                     const element = document.querySelector(
                         selector
                     ) as HTMLElement;
-                    if (element) {
-                        element.click();
+                    if (!element) {
                         return {
-                            found: true,
-                            tagName: element.tagName,
-                            className: element.className,
-                            id: element.id,
-                            text: element.textContent?.substring(
-                                0,
-                                TEXT_TRUNCATE_LENGTH
-                            ),
+                            found: false,
+                            reason: 'No element found matching selector',
                         };
                     }
-                    return { found: false };
+
+                    const elementInfo = {
+                        tagName: element.tagName,
+                        className: element.className,
+                        id: element.id,
+                        text: element.textContent?.substring(
+                            0,
+                            textTruncateLength
+                        ),
+                    };
+
+                    element.click();
+
+                    return {
+                        found: true,
+                        ...elementInfo,
+                    };
                 },
-                { selector: args.selector }
+                {
+                    selector: args.selector,
+                    textTruncateLength: TEXT_TRUNCATE_LENGTH,
+                }
             );
 
-            if (!elementInfo.found) {
+            if (!result.found) {
                 throw new Error(
                     `No element found matching selector: "${args.selector}"`
                 );
@@ -284,13 +313,15 @@ export const clickSelectorTool = {
             logger.info('Click completed');
 
             let resultText = `Clicked element matching selector: "${args.selector}"`;
-            resultText += `\nElement: <${elementInfo.tagName}`;
-            if (elementInfo.id) resultText += ` id="${elementInfo.id}"`;
-            if (elementInfo.className)
-                resultText += ` class="${elementInfo.className}"`;
-            resultText += '>';
-            if (elementInfo.text) {
-                resultText += `\nText: "${elementInfo.text}${elementInfo.text.length >= 50 ? '...' : ''}"`;
+            if ('tagName' in result) {
+                resultText += `\nElement: <${result.tagName}`;
+                if (result.id) resultText += ` id="${result.id}"`;
+                if (result.className)
+                    resultText += ` class="${result.className}"`;
+                resultText += '>';
+                if (result.text) {
+                    resultText += `\nText: "${result.text}${result.text.length >= TEXT_TRUNCATE_LENGTH ? '...' : ''}"`;
+                }
             }
 
             return {
