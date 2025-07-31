@@ -269,32 +269,54 @@ export const clickSelectorTool = {
             const waitAfter = args.waitAfter ?? DEFAULT_WAIT_AFTER_CLICK;
 
             const result = await page.evaluate(
-                ({ selector, textTruncateLength }) => {
-                    const element = document.querySelector(
-                        selector
-                    ) as HTMLElement;
-                    if (!element) {
-                        return {
-                            found: false,
-                            reason: 'No element found matching selector',
-                        };
+                async ({ selector, textTruncateLength }) => {
+                    for (let attempt = 1; attempt <= 3; attempt++) {
+                        let element = document.querySelector(selector) as HTMLElement;
+                        
+                        if (!element) {
+                            await new Promise(resolve => window.setTimeout(resolve, 1000));
+                            element = document.querySelector(selector) as HTMLElement;
+                        }
+                        
+                        if (element) {
+                            const rect = element.getBoundingClientRect();
+                            const style = window.getComputedStyle(element);
+                            const isClickable = rect.width > 0 && rect.height > 0 && 
+                                               style.visibility !== 'hidden' && 
+                                               style.display !== 'none' &&
+                                               !element.hasAttribute('disabled');
+                            
+                            if (isClickable) {
+                                const elementInfo = {
+                                    tagName: element.tagName,
+                                    className: element.className,
+                                    id: element.id,
+                                    text: element.textContent?.substring(
+                                        0,
+                                        textTruncateLength
+                                    ),
+                                };
+                                
+                                element.click();
+                                
+                                return {
+                                    found: true,
+                                    attempt,
+                                    strategy: 'querySelector',
+                                    ...elementInfo,
+                                };
+                            } else {
+                                return {
+                                    found: false,
+                                    reason: 'Element found but not clickable (hidden/disabled)',
+                                };
+                            }
+                        }
                     }
-
-                    const elementInfo = {
-                        tagName: element.tagName,
-                        className: element.className,
-                        id: element.id,
-                        text: element.textContent?.substring(
-                            0,
-                            textTruncateLength
-                        ),
-                    };
-
-                    element.click();
-
+                    
                     return {
-                        found: true,
-                        ...elementInfo,
+                        found: false,
+                        reason: `No element found after 3 attempts: "${selector}"`,
                     };
                 },
                 {
@@ -304,9 +326,7 @@ export const clickSelectorTool = {
             );
 
             if (!result.found) {
-                throw new Error(
-                    `No element found matching selector: "${args.selector}"`
-                );
+                throw new Error(result.reason);
             }
 
             await page.waitForTimeout(waitAfter);

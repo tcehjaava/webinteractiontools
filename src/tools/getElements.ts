@@ -161,7 +161,12 @@ export const getElementsTool = {
                 } else if (el.id) {
                     label = `#${el.id}`;
                 } else if (el.className) {
-                    label = `.${el.className.split(' ')[0]}`;
+                    const classNameStr = typeof el.className === 'string' 
+                        ? el.className 
+                        : String(el.className || '');
+                    if (classNameStr.trim()) {
+                        label = `.${classNameStr.split(' ')[0]}`;
+                    }
                 }
 
                 // Add type info for inputs
