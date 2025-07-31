@@ -2,6 +2,7 @@ import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { Logger } from '../lib/logger.js';
 
+const ELEMENT_TYPES = ['all', 'buttons', 'links', 'inputs', 'clickable'] as const;
 const DEFAULT_ELEMENT_TYPE = 'clickable' as const;
 const DEFAULT_SCOPE = 'viewport' as const;
 const DEFAULT_PAGE = 1;
@@ -56,6 +57,13 @@ export const getElementsTool = {
             const elements = await page.evaluate(
                 ({ type, scope }) => {
                     const getSelector = (type: string): string => {
+                        const validTypes = ['all', 'buttons', 'links', 'inputs', 'clickable'];
+                        if (!validTypes.includes(type)) {
+                            throw new Error(
+                                `Invalid element type: "${type}". Valid types are: ${validTypes.join(', ')}`
+                            );
+                        }
+                        
                         switch (type) {
                             case 'buttons':
                                 return 'button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]';
@@ -66,8 +74,10 @@ export const getElementsTool = {
                             case 'clickable':
                                 return 'button, a[href], input[type="button"], input[type="submit"], input[type="reset"], [role="button"], [role="link"], [onclick], [tabindex]:not([tabindex="-1"])';
                             case 'all':
-                            default:
                                 return '*';
+                            default:
+                                // This should never be reached due to validation above
+                                throw new Error(`Unhandled element type: ${type}`);
                         }
                     };
 
