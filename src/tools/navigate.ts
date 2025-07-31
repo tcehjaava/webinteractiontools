@@ -1,6 +1,14 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
+const NAVIGATION_TIMEOUT = {
+    DEFAULT: 30000,
+    MIN: 1000,
+    MAX: 120000,
+} as const;
+
+const DEFAULT_WAIT_UNTIL = 'domcontentloaded' as const;
+
 export const navigateTool = {
     name: 'navigate',
     description: 'Navigate to a URL',
@@ -14,10 +22,10 @@ export const navigateTool = {
             timeout: {
                 type: 'number',
                 description:
-                    'Navigation timeout in milliseconds (default: 30000ms)',
-                minimum: 1000,
-                maximum: 120000,
-                default: 30000,
+                    `Navigation timeout in milliseconds (default: ${NAVIGATION_TIMEOUT.DEFAULT}ms)`,
+                minimum: NAVIGATION_TIMEOUT.MIN,
+                maximum: NAVIGATION_TIMEOUT.MAX,
+                default: NAVIGATION_TIMEOUT.DEFAULT,
             },
             waitForSelector: {
                 type: 'string',
@@ -27,9 +35,9 @@ export const navigateTool = {
             waitUntil: {
                 type: 'string',
                 description:
-                    'When to consider navigation succeeded (default: "domcontentloaded")',
+                    `When to consider navigation succeeded (default: "${DEFAULT_WAIT_UNTIL}")`,
                 enum: ['load', 'domcontentloaded', 'networkidle'],
-                default: 'domcontentloaded',
+                default: DEFAULT_WAIT_UNTIL,
             },
         },
         required: ['url'],

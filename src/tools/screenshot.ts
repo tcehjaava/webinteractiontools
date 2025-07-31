@@ -1,6 +1,8 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
+const SCREENSHOT_FORMAT = 'png' as const;
+
 export const screenshotTool = {
     name: 'screenshot',
     description: 'Take a screenshot of the current page viewport',
@@ -47,7 +49,7 @@ export const screenshotTool = {
             });
 
             const screenshotOptions = {
-                type: 'png' as const,
+                type: SCREENSHOT_FORMAT,
             };
             console.log(
                 `Screenshot options: ${JSON.stringify(screenshotOptions)}`

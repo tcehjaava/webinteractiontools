@@ -1,6 +1,14 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
+const SCROLL_WAIT_TIME = {
+    SMOOTH: 500,
+    INSTANT: 100,
+} as const;
+
+const DEFAULT_SMOOTH = true;
+const DEFAULT_SCROLL_AMOUNT = 500;
+
 export const scrollToPositionTool = {
     name: 'scrollToPosition',
     description: 'Scroll to a specific Y coordinate on the page',
@@ -14,7 +22,7 @@ export const scrollToPositionTool = {
             smooth: {
                 type: 'boolean',
                 description: 'Use smooth scrolling animation',
-                default: true,
+                default: DEFAULT_SMOOTH,
             },
         },
         required: ['y'],
@@ -32,7 +40,7 @@ export const scrollToPositionTool = {
             const page = await session.getPage();
             console.log('Page obtained');
 
-            const smooth = args.smooth ?? true;
+            const smooth = args.smooth ?? DEFAULT_SMOOTH;
 
             await page.evaluate(
                 ({ y, smooth }) => {
@@ -44,7 +52,7 @@ export const scrollToPositionTool = {
                 { y: args.y, smooth }
             );
 
-            await page.waitForTimeout(smooth ? 500 : 100);
+            await page.waitForTimeout(smooth ? SCROLL_WAIT_TIME.SMOOTH : SCROLL_WAIT_TIME.INSTANT);
 
             const scrollPosition = await page.evaluate(() => {
                 return {
@@ -86,12 +94,12 @@ export const scrollDirectionTool = {
             amount: {
                 type: 'number',
                 description: 'Pixels to scroll (only applies to up/down)',
-                default: 500,
+                default: DEFAULT_SCROLL_AMOUNT,
             },
             smooth: {
                 type: 'boolean',
                 description: 'Use smooth scrolling animation',
-                default: true,
+                default: DEFAULT_SMOOTH,
             },
         },
         required: ['direction'],
@@ -110,8 +118,8 @@ export const scrollDirectionTool = {
             const page = await session.getPage();
             console.log('Page obtained');
 
-            const smooth = args.smooth ?? true;
-            const amount = args.amount ?? 500;
+            const smooth = args.smooth ?? DEFAULT_SMOOTH;
+            const amount = args.amount ?? DEFAULT_SCROLL_AMOUNT;
             let resultText = '';
 
             switch (args.direction) {
@@ -165,7 +173,7 @@ export const scrollDirectionTool = {
                     break;
             }
 
-            await page.waitForTimeout(smooth ? 500 : 100);
+            await page.waitForTimeout(smooth ? SCROLL_WAIT_TIME.SMOOTH : SCROLL_WAIT_TIME.INSTANT);
 
             const scrollPosition = await page.evaluate(() => {
                 return {
@@ -206,7 +214,7 @@ export const scrollToTextTool = {
             smooth: {
                 type: 'boolean',
                 description: 'Use smooth scrolling animation',
-                default: true,
+                default: DEFAULT_SMOOTH,
             },
         },
         required: ['text'],
@@ -224,7 +232,7 @@ export const scrollToTextTool = {
             const page = await session.getPage();
             console.log('Page obtained');
 
-            const smooth = args.smooth ?? true;
+            const smooth = args.smooth ?? DEFAULT_SMOOTH;
 
             const found = await page.evaluate(
                 ({ text, smooth }) => {
@@ -254,7 +262,7 @@ export const scrollToTextTool = {
                 );
             }
 
-            await page.waitForTimeout(smooth ? 500 : 100);
+            await page.waitForTimeout(smooth ? SCROLL_WAIT_TIME.SMOOTH : SCROLL_WAIT_TIME.INSTANT);
 
             const scrollPosition = await page.evaluate(() => {
                 return {

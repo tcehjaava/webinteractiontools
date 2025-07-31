@@ -1,6 +1,10 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
+const DEFAULT_WAIT_AFTER_CLICK = 1000;
+const DEFAULT_OCCURRENCE = 1;
+const TEXT_TRUNCATE_LENGTH = 50;
+
 export const clickTextTool = {
     name: 'clickText',
     description: 'Click on an element containing specific text',
@@ -15,12 +19,12 @@ export const clickTextTool = {
                 type: 'number',
                 description:
                     'Which occurrence to click if multiple matches (1-based)',
-                default: 1,
+                default: DEFAULT_OCCURRENCE,
             },
             waitAfter: {
                 type: 'number',
                 description: 'Milliseconds to wait after click',
-                default: 1000,
+                default: DEFAULT_WAIT_AFTER_CLICK,
             },
         },
         required: ['text'],
@@ -40,7 +44,7 @@ export const clickTextTool = {
             console.log('Page obtained');
 
             const occurrence = args.occurrence ?? 1;
-            const waitAfter = args.waitAfter ?? 1000;
+            const waitAfter = args.waitAfter ?? DEFAULT_WAIT_AFTER_CLICK;
 
             const clicked = await page.evaluate(
                 ({ text, occurrence }) => {
@@ -139,7 +143,7 @@ export const clickPositionTool = {
             waitAfter: {
                 type: 'number',
                 description: 'Milliseconds to wait after click',
-                default: 1000,
+                default: DEFAULT_WAIT_AFTER_CLICK,
             },
         },
         required: ['x', 'y'],
@@ -158,7 +162,7 @@ export const clickPositionTool = {
             const page = await session.getPage();
             console.log('Page obtained');
 
-            const waitAfter = args.waitAfter ?? 1000;
+            const waitAfter = args.waitAfter ?? DEFAULT_WAIT_AFTER_CLICK;
 
             // Click at the specified coordinates
             await page.mouse.click(args.x, args.y);
@@ -172,7 +176,7 @@ export const clickPositionTool = {
                             tagName: element.tagName,
                             className: element.className,
                             id: element.id,
-                            text: element.textContent?.substring(0, 50),
+                            text: element.textContent?.substring(0, TEXT_TRUNCATE_LENGTH),
                         };
                     }
                     return null;
@@ -223,7 +227,7 @@ export const clickSelectorTool = {
             waitAfter: {
                 type: 'number',
                 description: 'Milliseconds to wait after click',
-                default: 1000,
+                default: DEFAULT_WAIT_AFTER_CLICK,
             },
         },
         required: ['selector'],
@@ -241,7 +245,7 @@ export const clickSelectorTool = {
             const page = await session.getPage();
             console.log('Page obtained');
 
-            const waitAfter = args.waitAfter ?? 1000;
+            const waitAfter = args.waitAfter ?? DEFAULT_WAIT_AFTER_CLICK;
 
             const elementInfo = await page.evaluate(
                 ({ selector }) => {
@@ -253,7 +257,7 @@ export const clickSelectorTool = {
                             tagName: element.tagName,
                             className: element.className,
                             id: element.id,
-                            text: element.textContent?.substring(0, 50),
+                            text: element.textContent?.substring(0, TEXT_TRUNCATE_LENGTH),
                         };
                     }
                     return { found: false };

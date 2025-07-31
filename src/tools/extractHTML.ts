@@ -1,6 +1,10 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
+const DEFAULT_SELECTOR = 'body';
+const DEFAULT_CLEAN = true;
+const DEFAULT_VIEWPORT = false;
+
 export const extractHTMLTool = {
     name: 'extractHTML',
     description: 'Extract HTML content from the page or specific elements',
@@ -9,18 +13,18 @@ export const extractHTMLTool = {
         properties: {
             selector: {
                 type: 'string',
-                description: 'CSS selector (default: body)',
-                default: 'body',
+                description: `CSS selector (default: ${DEFAULT_SELECTOR})`,
+                default: DEFAULT_SELECTOR,
             },
             clean: {
                 type: 'boolean',
                 description: 'Remove scripts, styles, and hidden elements',
-                default: true,
+                default: DEFAULT_CLEAN,
             },
             viewport: {
                 type: 'boolean',
                 description: 'Only extract visible viewport content',
-                default: false,
+                default: DEFAULT_VIEWPORT,
             },
         },
     },
@@ -38,7 +42,7 @@ export const extractHTMLTool = {
             const page = await session.getPage();
             console.log('Page obtained');
 
-            const selector = args.selector ?? 'body';
+            const selector = args.selector ?? DEFAULT_SELECTOR;
             const clean = args.clean ?? true;
             const viewport = args.viewport ?? false;
 

@@ -1,6 +1,11 @@
 import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
+const DEFAULT_ELEMENT_TYPE = 'clickable' as const;
+const DEFAULT_SCOPE = 'viewport' as const;
+const DEFAULT_PAGE = 1;
+const ELEMENTS_PER_PAGE = 20;
+
 export const getElementsTool = {
     name: 'getElements',
     description: 'Get clickable elements currently visible in the viewport',
@@ -10,20 +15,20 @@ export const getElementsTool = {
             type: {
                 type: 'string',
                 enum: ['all', 'buttons', 'links', 'inputs', 'clickable'],
-                default: 'clickable',
+                default: DEFAULT_ELEMENT_TYPE,
                 description: 'Type of elements to find',
             },
             scope: {
                 type: 'string',
                 enum: ['viewport', 'all'],
-                default: 'viewport',
+                default: DEFAULT_SCOPE,
                 description: 'Search in viewport only or entire page',
             },
             page: {
                 type: 'number',
-                default: 1,
+                default: DEFAULT_PAGE,
                 description:
-                    'Page number for pagination (20 elements per page)',
+                    `Page number for pagination (${ELEMENTS_PER_PAGE} elements per page)`,
             },
         },
     },
@@ -44,7 +49,7 @@ export const getElementsTool = {
             const elementType = args.type ?? 'clickable';
             const searchScope = args.scope ?? 'viewport';
             const pageNumber = args.page ?? 1;
-            const elementsPerPage = 20;
+            const elementsPerPage = ELEMENTS_PER_PAGE;
 
             const elements = await page.evaluate(
                 ({ type, scope }) => {
