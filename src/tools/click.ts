@@ -72,24 +72,14 @@ export const clickTextTool = {
                         }
                     }
 
-                    // Count remaining matches
-                    for (
-                        let i = elements.indexOf(elements[matchCount]);
-                        i < elements.length;
-                        i++
-                    ) {
-                        const el = elements[i];
-                        if (
-                            el?.textContent &&
-                            el.textContent.includes(text as string)
-                        ) {
-                            matchCount++;
-                        }
-                    }
+                    // Count total matches in the document
+                    const totalMatches = elements.filter(
+                        el => el.textContent && el.textContent.includes(text as string)
+                    ).length;
 
                     return {
                         clicked: false,
-                        totalMatches: matchCount,
+                        totalMatches: totalMatches,
                         tagName: null,
                         className: null,
                     };

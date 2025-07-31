@@ -40,6 +40,12 @@ export const navigateTool = {
                 enum: ['load', 'domcontentloaded', 'networkidle'],
                 default: DEFAULT_WAIT_UNTIL,
             },
+            headless: {
+                type: 'boolean',
+                description:
+                    'Use headless browser mode (default: true). Set to false to show browser window',
+                default: true,
+            },
         },
         required: ['url'],
     },
@@ -50,12 +56,14 @@ export const navigateTool = {
             timeout?: number;
             waitForSelector?: string;
             waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
+            headless?: boolean;
         }
     ): Promise<CallToolResult> {
         logger.info('Tool called', args);
 
         try {
-            const page = await session.getPage();
+            const headless = args.headless ?? true;
+            const page = await session.getPage(headless);
             logger.debug('Page obtained');
 
             const timeout = args.timeout ?? 30000;
