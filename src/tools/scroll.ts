@@ -242,7 +242,7 @@ export const scrollToTextTool = {
                     for (const element of elements) {
                         if (
                             element.textContent &&
-                            element.textContent.includes(text as string)
+                            element.textContent.includes(text)
                         ) {
                             element.scrollIntoView({
                                 behavior: smooth ? 'smooth' : 'auto',

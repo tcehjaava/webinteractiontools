@@ -56,8 +56,7 @@ export const extractHTMLTool = {
                             document.querySelectorAll(selector)
                         );
 
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        const visibleElements = elements.filter((element: any) => {
+                        const visibleElements = elements.filter((element) => {
                             const rect = element.getBoundingClientRect();
                             return (
                                 rect.bottom > 0 &&
@@ -71,22 +70,18 @@ export const extractHTMLTool = {
                         }
 
                         const container = document.createElement('div');
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        visibleElements.forEach((el: any) => {
+                        visibleElements.forEach((el) => {
                             const clone = el.cloneNode(true) as HTMLElement;
                             if (clean) {
                                 clone
                                     .querySelectorAll('script, style, noscript')
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    .forEach((el: any) => el.remove());
+                                    .forEach((el) => el.remove());
                                 clone
                                     .querySelectorAll('[style*="display: none"]')
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    .forEach((el: any) => el.remove());
+                                    .forEach((el) => el.remove());
                                 clone
                                     .querySelectorAll('[hidden]')
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    .forEach((el: any) => el.remove());
+                                    .forEach((el) => el.remove());
                             }
                             container.appendChild(clone);
                         });
@@ -111,41 +106,34 @@ export const extractHTMLTool = {
                                 ) as HTMLElement;
                                 clone
                                     .querySelectorAll('script, style, noscript')
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    .forEach((el: any) => el.remove());
+                                    .forEach((el) => el.remove());
                                 clone
                                     .querySelectorAll('[style*="display: none"]')
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    .forEach((el: any) => el.remove());
+                                    .forEach((el) => el.remove());
                                 clone
                                     .querySelectorAll('[hidden]')
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    .forEach((el: any) => el.remove());
+                                    .forEach((el) => el.remove());
                                 return clone.outerHTML;
                             }
                             return element.outerHTML;
                         } else {
                             const container = document.createElement('div');
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            elements.forEach((el: any) => {
+                            elements.forEach((el) => {
                                 const clone = el.cloneNode(true) as HTMLElement;
                                 if (clean) {
                                     clone
                                         .querySelectorAll(
                                             'script, style, noscript'
                                         )
-                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                        .forEach((el: any) => el.remove());
+                                        .forEach((el) => el.remove());
                                     clone
                                         .querySelectorAll(
                                             '[style*="display: none"]'
                                         )
-                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                        .forEach((el: any) => el.remove());
+                                        .forEach((el) => el.remove());
                                     clone
                                         .querySelectorAll('[hidden]')
-                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                        .forEach((el: any) => el.remove());
+                                        .forEach((el) => el.remove());
                                 }
                                 container.appendChild(clone);
                             });
@@ -157,8 +145,7 @@ export const extractHTMLTool = {
             }
 
             const elementCount = await page.evaluate(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (selector: any) =>
+                (selector) =>
                     document.querySelectorAll(selector).length,
                 selector
             );
