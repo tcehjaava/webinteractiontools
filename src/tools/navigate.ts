@@ -24,8 +24,7 @@ export const navigateTool = {
             },
             timeout: {
                 type: 'number',
-                description:
-                    `Navigation timeout in milliseconds (default: ${NAVIGATION_TIMEOUT.DEFAULT}ms)`,
+                description: `Navigation timeout in milliseconds (default: ${NAVIGATION_TIMEOUT.DEFAULT}ms)`,
                 minimum: NAVIGATION_TIMEOUT.MIN,
                 maximum: NAVIGATION_TIMEOUT.MAX,
                 default: NAVIGATION_TIMEOUT.DEFAULT,
@@ -37,8 +36,7 @@ export const navigateTool = {
             },
             waitUntil: {
                 type: 'string',
-                description:
-                    `When to consider navigation succeeded (default: "${DEFAULT_WAIT_UNTIL}")`,
+                description: `When to consider navigation succeeded (default: "${DEFAULT_WAIT_UNTIL}")`,
                 enum: ['load', 'domcontentloaded', 'networkidle'],
                 default: DEFAULT_WAIT_UNTIL,
             },
@@ -83,7 +81,9 @@ export const navigateTool = {
                     });
                     logger.debug('Selector found');
                 } catch {
-                    logger.warn(`Selector "${args.waitForSelector}" not found, continuing`);
+                    logger.warn(
+                        `Selector "${args.waitForSelector}" not found, continuing`
+                    );
                 }
             }
 

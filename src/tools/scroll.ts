@@ -12,7 +12,11 @@ const DEFAULT_SCROLL_AMOUNT = 500;
 
 const logger = new Logger('scroll');
 
-function formatScrollPercentage(scrollY: number, totalHeight: number, viewportHeight: number): string {
+function formatScrollPercentage(
+    scrollY: number,
+    totalHeight: number,
+    viewportHeight: number
+): string {
     const scrollableHeight = totalHeight - viewportHeight;
     if (scrollableHeight <= 0) return 'Y=0 (0% of page)';
     const percentage = Math.round((scrollY / scrollableHeight) * 100);
@@ -62,7 +66,9 @@ export const scrollToPositionTool = {
                 { y: args.y, smooth }
             );
 
-            await page.waitForTimeout(smooth ? SCROLL_WAIT_TIME.SMOOTH : SCROLL_WAIT_TIME.INSTANT);
+            await page.waitForTimeout(
+                smooth ? SCROLL_WAIT_TIME.SMOOTH : SCROLL_WAIT_TIME.INSTANT
+            );
 
             const scrollPosition = await page.evaluate(() => {
                 return {
@@ -183,7 +189,9 @@ export const scrollDirectionTool = {
                     break;
             }
 
-            await page.waitForTimeout(smooth ? SCROLL_WAIT_TIME.SMOOTH : SCROLL_WAIT_TIME.INSTANT);
+            await page.waitForTimeout(
+                smooth ? SCROLL_WAIT_TIME.SMOOTH : SCROLL_WAIT_TIME.INSTANT
+            );
 
             const scrollPosition = await page.evaluate(() => {
                 return {
@@ -246,12 +254,10 @@ export const scrollToTextTool = {
 
             const result = await page.evaluate(
                 ({ text, smooth }) => {
-                    const elements = Array.from(
-                        document.querySelectorAll('*')
-                    );
+                    const elements = Array.from(document.querySelectorAll('*'));
                     let matchCount = 0;
                     let scrolledElement = null;
-                    
+
                     for (const element of elements) {
                         if (
                             element.textContent &&
@@ -265,12 +271,17 @@ export const scrollToTextTool = {
                                 });
                                 scrolledElement = {
                                     tagName: element.tagName,
-                                    className: (element as HTMLElement).className,
+                                    className: (element as HTMLElement)
+                                        .className,
                                 };
                             }
                         }
                     }
-                    return { found: matchCount > 0, matchCount, scrolledElement };
+                    return {
+                        found: matchCount > 0,
+                        matchCount,
+                        scrolledElement,
+                    };
                 },
                 { text: args.text, smooth }
             );
@@ -281,7 +292,9 @@ export const scrollToTextTool = {
                 );
             }
 
-            await page.waitForTimeout(smooth ? SCROLL_WAIT_TIME.SMOOTH : SCROLL_WAIT_TIME.INSTANT);
+            await page.waitForTimeout(
+                smooth ? SCROLL_WAIT_TIME.SMOOTH : SCROLL_WAIT_TIME.INSTANT
+            );
 
             const scrollPosition = await page.evaluate(() => {
                 return {

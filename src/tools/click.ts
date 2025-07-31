@@ -52,9 +52,7 @@ export const clickTextTool = {
             const clicked = await page.evaluate(
                 ({ text, occurrence }) => {
                     let matchCount = 0;
-                    const elements = Array.from(
-                        document.querySelectorAll('*')
-                    );
+                    const elements = Array.from(document.querySelectorAll('*'));
 
                     for (const element of elements) {
                         if (
@@ -179,7 +177,10 @@ export const clickPositionTool = {
                             tagName: element.tagName,
                             className: element.className,
                             id: element.id,
-                            text: element.textContent?.substring(0, TEXT_TRUNCATE_LENGTH),
+                            text: element.textContent?.substring(
+                                0,
+                                TEXT_TRUNCATE_LENGTH
+                            ),
                         };
                     }
                     return null;
@@ -252,7 +253,9 @@ export const clickSelectorTool = {
 
             const elementInfo = await page.evaluate(
                 ({ selector }) => {
-                    const element = document.querySelector(selector) as HTMLElement;
+                    const element = document.querySelector(
+                        selector
+                    ) as HTMLElement;
                     if (element) {
                         element.click();
                         return {
@@ -260,7 +263,10 @@ export const clickSelectorTool = {
                             tagName: element.tagName,
                             className: element.className,
                             id: element.id,
-                            text: element.textContent?.substring(0, TEXT_TRUNCATE_LENGTH),
+                            text: element.textContent?.substring(
+                                0,
+                                TEXT_TRUNCATE_LENGTH
+                            ),
                         };
                     }
                     return { found: false };

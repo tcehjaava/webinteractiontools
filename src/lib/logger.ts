@@ -8,7 +8,7 @@ export class Logger {
     private format(level: string, message: string, data?: unknown): string {
         const timestamp = new Date().toISOString();
         const prefix = `[${timestamp}] [${this.toolName}] ${level}: ${message}`;
-        
+
         if (data !== undefined) {
             return `${prefix} ${JSON.stringify(data)}`;
         }

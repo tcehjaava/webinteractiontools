@@ -59,7 +59,9 @@ export const screenshotTool = {
             const screenshot = await page.screenshot(screenshotOptions);
 
             const base64Image = screenshot.toString('base64');
-            logger.info('Screenshot captured', { size: `${base64Image.length} chars` });
+            logger.info('Screenshot captured', {
+                size: `${base64Image.length} chars`,
+            });
 
             const scrollPercentage =
                 pageInfo.totalHeight > 0

@@ -59,7 +59,7 @@ export const extractHTMLTool = {
                             document.querySelectorAll(selector)
                         );
 
-                        const visibleElements = elements.filter((element) => {
+                        const visibleElements = elements.filter(element => {
                             const rect = element.getBoundingClientRect();
                             return (
                                 rect.bottom > 0 &&
@@ -73,18 +73,20 @@ export const extractHTMLTool = {
                         }
 
                         const container = document.createElement('div');
-                        visibleElements.forEach((el) => {
+                        visibleElements.forEach(el => {
                             const clone = el.cloneNode(true) as HTMLElement;
                             if (clean) {
                                 clone
                                     .querySelectorAll('script, style, noscript')
-                                    .forEach((el) => el.remove());
+                                    .forEach(el => el.remove());
                                 clone
-                                    .querySelectorAll('[style*="display: none"]')
-                                    .forEach((el) => el.remove());
+                                    .querySelectorAll(
+                                        '[style*="display: none"]'
+                                    )
+                                    .forEach(el => el.remove());
                                 clone
                                     .querySelectorAll('[hidden]')
-                                    .forEach((el) => el.remove());
+                                    .forEach(el => el.remove());
                             }
                             container.appendChild(clone);
                         });
@@ -109,34 +111,36 @@ export const extractHTMLTool = {
                                 ) as HTMLElement;
                                 clone
                                     .querySelectorAll('script, style, noscript')
-                                    .forEach((el) => el.remove());
+                                    .forEach(el => el.remove());
                                 clone
-                                    .querySelectorAll('[style*="display: none"]')
-                                    .forEach((el) => el.remove());
+                                    .querySelectorAll(
+                                        '[style*="display: none"]'
+                                    )
+                                    .forEach(el => el.remove());
                                 clone
                                     .querySelectorAll('[hidden]')
-                                    .forEach((el) => el.remove());
+                                    .forEach(el => el.remove());
                                 return clone.outerHTML;
                             }
                             return element.outerHTML;
                         } else {
                             const container = document.createElement('div');
-                            elements.forEach((el) => {
+                            elements.forEach(el => {
                                 const clone = el.cloneNode(true) as HTMLElement;
                                 if (clean) {
                                     clone
                                         .querySelectorAll(
                                             'script, style, noscript'
                                         )
-                                        .forEach((el) => el.remove());
+                                        .forEach(el => el.remove());
                                     clone
                                         .querySelectorAll(
                                             '[style*="display: none"]'
                                         )
-                                        .forEach((el) => el.remove());
+                                        .forEach(el => el.remove());
                                     clone
                                         .querySelectorAll('[hidden]')
-                                        .forEach((el) => el.remove());
+                                        .forEach(el => el.remove());
                                 }
                                 container.appendChild(clone);
                             });
@@ -148,8 +152,7 @@ export const extractHTMLTool = {
             }
 
             const elementCount = await page.evaluate(
-                (selector) =>
-                    document.querySelectorAll(selector).length,
+                selector => document.querySelectorAll(selector).length,
                 selector
             );
 

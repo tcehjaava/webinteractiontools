@@ -30,8 +30,7 @@ export const getElementsTool = {
             page: {
                 type: 'number',
                 default: DEFAULT_PAGE,
-                description:
-                    `Page number for pagination (${ELEMENTS_PER_PAGE} elements per page)`,
+                description: `Page number for pagination (${ELEMENTS_PER_PAGE} elements per page)`,
             },
         },
     },
