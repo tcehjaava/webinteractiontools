@@ -185,7 +185,28 @@ export const clickPositionTool = {
                         ),
                     };
 
-                    (element as HTMLElement).click();
+                    try {
+                        if (
+                            element instanceof HTMLElement &&
+                            typeof element.click === 'function'
+                        ) {
+                            element.click();
+                        } else {
+                            const clickEvent = new MouseEvent('click', {
+                                view: window,
+                                bubbles: true,
+                                cancelable: true,
+                                clientX: x,
+                                clientY: y,
+                            });
+                            element.dispatchEvent(clickEvent);
+                        }
+                    } catch {
+                        const basicClickEvent = new Event('click', {
+                            bubbles: true,
+                        });
+                        element.dispatchEvent(basicClickEvent);
+                    }
 
                     return {
                         clicked: true,
@@ -271,21 +292,29 @@ export const clickSelectorTool = {
             const result = await page.evaluate(
                 async ({ selector, textTruncateLength }) => {
                     for (let attempt = 1; attempt <= 3; attempt++) {
-                        let element = document.querySelector(selector) as HTMLElement;
-                        
+                        let element = document.querySelector(
+                            selector
+                        ) as HTMLElement;
+
                         if (!element) {
-                            await new Promise(resolve => window.setTimeout(resolve, 1000));
-                            element = document.querySelector(selector) as HTMLElement;
+                            await new Promise(resolve =>
+                                window.setTimeout(resolve, 1000)
+                            );
+                            element = document.querySelector(
+                                selector
+                            ) as HTMLElement;
                         }
-                        
+
                         if (element) {
                             const rect = element.getBoundingClientRect();
                             const style = window.getComputedStyle(element);
-                            const isClickable = rect.width > 0 && rect.height > 0 && 
-                                               style.visibility !== 'hidden' && 
-                                               style.display !== 'none' &&
-                                               !element.hasAttribute('disabled');
-                            
+                            const isClickable =
+                                rect.width > 0 &&
+                                rect.height > 0 &&
+                                style.visibility !== 'hidden' &&
+                                style.display !== 'none' &&
+                                !element.hasAttribute('disabled');
+
                             if (isClickable) {
                                 const elementInfo = {
                                     tagName: element.tagName,
@@ -296,9 +325,9 @@ export const clickSelectorTool = {
                                         textTruncateLength
                                     ),
                                 };
-                                
+
                                 element.click();
-                                
+
                                 return {
                                     found: true,
                                     attempt,
@@ -313,7 +342,7 @@ export const clickSelectorTool = {
                             }
                         }
                     }
-                    
+
                     return {
                         found: false,
                         reason: `No element found after 3 attempts: "${selector}"`,
