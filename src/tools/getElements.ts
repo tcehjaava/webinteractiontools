@@ -71,14 +71,10 @@ export const getElementsTool = {
                             rect.top >= 0 &&
                             rect.left >= 0 &&
                             rect.bottom <=
-                                // @ts-expect-error - browser context has DOM globals
                                 (window.innerHeight ||
-                                    // @ts-expect-error - browser context has DOM globals
                                     document.documentElement.clientHeight) &&
                             rect.right <=
-                                // @ts-expect-error - browser context has DOM globals
                                 (window.innerWidth ||
-                                    // @ts-expect-error - browser context has DOM globals
                                     document.documentElement.clientWidth) &&
                             rect.width > 0 &&
                             rect.height > 0
@@ -87,7 +83,6 @@ export const getElementsTool = {
 
                     const selector = getSelector(type);
                     const allElements = Array.from(
-                        // @ts-expect-error - browser context has DOM globals
                         document.querySelectorAll(selector)
                     );
 

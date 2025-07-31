@@ -36,7 +36,6 @@ export const scrollToPositionTool = {
 
             await page.evaluate(
                 ({ y, smooth }) => {
-                    // @ts-expect-error - browser context has DOM globals
                     window.scrollTo({
                         top: y,
                         behavior: smooth ? 'smooth' : 'auto',
@@ -49,13 +48,9 @@ export const scrollToPositionTool = {
 
             const scrollPosition = await page.evaluate(() => {
                 return {
-                    // @ts-expect-error - browser context has DOM globals
                     x: window.scrollX,
-                    // @ts-expect-error - browser context has DOM globals
                     y: window.scrollY,
-                    // @ts-expect-error - browser context has DOM globals
                     height: document.documentElement.scrollHeight,
-                    // @ts-expect-error - browser context has DOM globals
                     viewportHeight: window.innerHeight,
                 };
             });
@@ -123,7 +118,6 @@ export const scrollDirectionTool = {
                 case 'up':
                     await page.evaluate(
                         ({ amount, smooth }) => {
-                            // @ts-expect-error - browser context has DOM globals
                             window.scrollBy({
                                 top: -amount,
                                 behavior: smooth ? 'smooth' : 'auto',
@@ -136,7 +130,6 @@ export const scrollDirectionTool = {
                 case 'down':
                     await page.evaluate(
                         ({ amount, smooth }) => {
-                            // @ts-expect-error - browser context has DOM globals
                             window.scrollBy({
                                 top: amount,
                                 behavior: smooth ? 'smooth' : 'auto',
@@ -149,7 +142,6 @@ export const scrollDirectionTool = {
                 case 'top':
                     await page.evaluate(
                         ({ smooth }) => {
-                            // @ts-expect-error - browser context has DOM globals
                             window.scrollTo({
                                 top: 0,
                                 behavior: smooth ? 'smooth' : 'auto',
@@ -162,9 +154,7 @@ export const scrollDirectionTool = {
                 case 'bottom':
                     await page.evaluate(
                         ({ smooth }) => {
-                            // @ts-expect-error - browser context has DOM globals
                             window.scrollTo({
-                                // @ts-expect-error - browser context has DOM globals
                                 top: document.body.scrollHeight,
                                 behavior: smooth ? 'smooth' : 'auto',
                             });
@@ -179,13 +169,9 @@ export const scrollDirectionTool = {
 
             const scrollPosition = await page.evaluate(() => {
                 return {
-                    // @ts-expect-error - browser context has DOM globals
                     x: window.scrollX,
-                    // @ts-expect-error - browser context has DOM globals
                     y: window.scrollY,
-                    // @ts-expect-error - browser context has DOM globals
                     height: document.documentElement.scrollHeight,
-                    // @ts-expect-error - browser context has DOM globals
                     viewportHeight: window.innerHeight,
                 };
             });
@@ -243,17 +229,13 @@ export const scrollToTextTool = {
             const found = await page.evaluate(
                 ({ text, smooth }) => {
                     const elements = Array.from(
-                        // @ts-expect-error - browser context has DOM globals
                         document.querySelectorAll('*')
                     );
                     for (const element of elements) {
                         if (
-                            // @ts-expect-error - element type is unknown in Node context
                             element.textContent &&
-                            // @ts-expect-error - element type is unknown in Node context
                             element.textContent.includes(text as string)
                         ) {
-                            // @ts-expect-error - element type is unknown in Node context
                             element.scrollIntoView({
                                 behavior: smooth ? 'smooth' : 'auto',
                                 block: 'center',
@@ -276,13 +258,9 @@ export const scrollToTextTool = {
 
             const scrollPosition = await page.evaluate(() => {
                 return {
-                    // @ts-expect-error - browser context has DOM globals
                     x: window.scrollX,
-                    // @ts-expect-error - browser context has DOM globals
                     y: window.scrollY,
-                    // @ts-expect-error - browser context has DOM globals
                     height: document.documentElement.scrollHeight,
-                    // @ts-expect-error - browser context has DOM globals
                     viewportHeight: window.innerHeight,
                 };
             });

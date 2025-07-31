@@ -46,27 +46,21 @@ export const clickTextTool = {
                 ({ text, occurrence }) => {
                     let matchCount = 0;
                     const elements = Array.from(
-                        // @ts-expect-error - browser context has DOM globals
                         document.querySelectorAll('*')
                     );
 
                     for (const element of elements) {
                         if (
-                            // @ts-expect-error - element type is unknown in Node context
                             element.textContent &&
-                            // @ts-expect-error - element type is unknown in Node context
                             element.textContent.includes(text as string)
                         ) {
                             matchCount++;
                             if (matchCount === occurrence) {
-                                // @ts-expect-error - element type is unknown in Node context
-                                element.click();
+                                (element as HTMLElement).click();
                                 return {
                                     clicked: true,
                                     totalMatches: matchCount,
-                                    // @ts-expect-error - element type is unknown in Node context
                                     tagName: element.tagName,
-                                    // @ts-expect-error - element type is unknown in Node context
                                     className: element.className,
                                 };
                             }
@@ -79,11 +73,10 @@ export const clickTextTool = {
                         i < elements.length;
                         i++
                     ) {
+                        const el = elements[i];
                         if (
-                            // @ts-expect-error - element type is unknown in Node context
-                            elements[i].textContent &&
-                            // @ts-expect-error - element type is unknown in Node context
-                            elements[i].textContent.includes(text as string)
+                            el?.textContent &&
+                            el.textContent.includes(text as string)
                         ) {
                             matchCount++;
                         }
@@ -173,7 +166,6 @@ export const clickPositionTool = {
             // Get element information at click position
             const elementInfo = await page.evaluate(
                 ({ x, y }) => {
-                    // @ts-expect-error - browser context has DOM globals
                     const element = document.elementFromPoint(x, y);
                     if (element) {
                         return {
@@ -253,8 +245,7 @@ export const clickSelectorTool = {
 
             const elementInfo = await page.evaluate(
                 ({ selector }) => {
-                    // @ts-expect-error - browser context has DOM globals
-                    const element = document.querySelector(selector);
+                    const element = document.querySelector(selector) as HTMLElement;
                     if (element) {
                         element.click();
                         return {

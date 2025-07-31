@@ -24,9 +24,7 @@ export const screenshotTool = {
             const viewport = page.viewportSize() || { width: 0, height: 0 };
 
             const pageInfo = await page.evaluate(() => {
-                // @ts-expect-error - browser context has DOM globals
                 const body = document.body;
-                // @ts-expect-error - browser context has DOM globals
                 const html = document.documentElement;
 
                 const scrollHeight = Math.max(
@@ -38,9 +36,7 @@ export const screenshotTool = {
                 );
 
                 const scrollTop =
-                    // @ts-expect-error - browser context has window global
                     window.pageYOffset || html.scrollTop || body.scrollTop || 0;
-                // @ts-expect-error - browser context has window global
                 const viewportHeight = window.innerHeight || html.clientHeight;
 
                 return {

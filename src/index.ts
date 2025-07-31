@@ -20,6 +20,7 @@ import {
     clickSelectorTool,
 } from './tools/click.js';
 import { getElementsTool } from './tools/getElements.js';
+import { extractHTMLTool } from './tools/extractHTML.js';
 
 interface Tool {
     name: string;
@@ -59,6 +60,7 @@ const tools = [
     clickPositionTool,
     clickSelectorTool,
     getElementsTool,
+    extractHTMLTool,
 ] as const;
 
 server.setRequestHandler(
