@@ -61,12 +61,30 @@ export const hoverTextTool = {
                         ) {
                             matchCount++;
                             if (matchCount === occurrence) {
+                                // Get element's bounding box for cursor position
+                                const rect = element.getBoundingClientRect();
+                                const x = rect.left + rect.width / 2;
+                                const y = rect.top + rect.height / 2;
+                                
+                                // Dispatch mousemove first to simulate cursor movement
+                                const mousemoveEvent = new MouseEvent(
+                                    'mousemove',
+                                    {
+                                        view: window,
+                                        bubbles: true,
+                                        cancelable: true,
+                                        clientX: x,
+                                        clientY: y,
+                                    }
+                                );
                                 const mouseoverEvent = new MouseEvent(
                                     'mouseover',
                                     {
                                         view: window,
                                         bubbles: true,
                                         cancelable: true,
+                                        clientX: x,
+                                        clientY: y,
                                     }
                                 );
                                 const mouseenterEvent = new MouseEvent(
@@ -75,8 +93,11 @@ export const hoverTextTool = {
                                         view: window,
                                         bubbles: false,
                                         cancelable: true,
+                                        clientX: x,
+                                        clientY: y,
                                     }
                                 );
+                                element.dispatchEvent(mousemoveEvent);
                                 element.dispatchEvent(mouseoverEvent);
                                 element.dispatchEvent(mouseenterEvent);
                                 return {
@@ -118,6 +139,26 @@ export const hoverTextTool = {
                 }
             }
 
+            // Try using Playwright's native hover method as well for better compatibility
+            try {
+                // Find the element again and use Playwright's hover
+                const elements = await page.$$('*');
+                let count = 0;
+                for (const element of elements) {
+                    const text = await element.textContent();
+                    if (text && text.includes(args.text)) {
+                        count++;
+                        if (count === occurrence) {
+                            await element.hover();
+                            break;
+                        }
+                    }
+                }
+            } catch (e) {
+                // If native hover fails, continue with synthetic events approach
+                logger.debug('Native hover failed, continuing with synthetic events', e);
+            }
+            
             await page.waitForTimeout(waitAfter);
             logger.info('Hover completed');
 
@@ -194,6 +235,14 @@ export const hoverPositionTool = {
                         ),
                     };
 
+                    // Dispatch mousemove first to simulate cursor movement
+                    const mousemoveEvent = new MouseEvent('mousemove', {
+                        view: window,
+                        bubbles: true,
+                        cancelable: true,
+                        clientX: x,
+                        clientY: y,
+                    });
                     const mouseoverEvent = new MouseEvent('mouseover', {
                         view: window,
                         bubbles: true,
@@ -208,6 +257,7 @@ export const hoverPositionTool = {
                         clientX: x,
                         clientY: y,
                     });
+                    element.dispatchEvent(mousemoveEvent);
                     element.dispatchEvent(mouseoverEvent);
                     element.dispatchEvent(mouseenterEvent);
 
@@ -227,6 +277,13 @@ export const hoverPositionTool = {
                 throw new Error(
                     `${result.reason} at coordinates (${args.x}, ${args.y})`
                 );
+            }
+
+            // Also use Playwright's native hover for better compatibility
+            try {
+                await page.mouse.move(args.x, args.y);
+            } catch (e) {
+                logger.debug('Native mouse move failed, continuing with synthetic events', e);
             }
 
             await page.waitForTimeout(waitAfter);
@@ -328,12 +385,30 @@ export const hoverSelectorTool = {
                                     ),
                                 };
 
+                                // Get element's bounding box for cursor position
+                                const rect = element.getBoundingClientRect();
+                                const x = rect.left + rect.width / 2;
+                                const y = rect.top + rect.height / 2;
+                                
+                                // Dispatch mousemove first to simulate cursor movement
+                                const mousemoveEvent = new MouseEvent(
+                                    'mousemove',
+                                    {
+                                        view: window,
+                                        bubbles: true,
+                                        cancelable: true,
+                                        clientX: x,
+                                        clientY: y,
+                                    }
+                                );
                                 const mouseoverEvent = new MouseEvent(
                                     'mouseover',
                                     {
                                         view: window,
                                         bubbles: true,
                                         cancelable: true,
+                                        clientX: x,
+                                        clientY: y,
                                     }
                                 );
                                 const mouseenterEvent = new MouseEvent(
@@ -342,8 +417,11 @@ export const hoverSelectorTool = {
                                         view: window,
                                         bubbles: false,
                                         cancelable: true,
+                                        clientX: x,
+                                        clientY: y,
                                     }
                                 );
+                                element.dispatchEvent(mousemoveEvent);
                                 element.dispatchEvent(mouseoverEvent);
                                 element.dispatchEvent(mouseenterEvent);
 
@@ -375,6 +453,16 @@ export const hoverSelectorTool = {
 
             if (!result.found) {
                 throw new Error(result.reason);
+            }
+
+            // Try using Playwright's native hover method as well
+            try {
+                const element = await page.$(args.selector);
+                if (element) {
+                    await element.hover();
+                }
+            } catch (e) {
+                logger.debug('Native hover failed, continuing with synthetic events', e);
             }
 
             await page.waitForTimeout(waitAfter);
