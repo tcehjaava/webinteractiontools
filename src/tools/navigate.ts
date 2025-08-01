@@ -115,3 +115,112 @@ export const navigateTool = {
         }
     },
 };
+
+export const goBackTool = {
+    name: 'goBack',
+    description: 'Navigate back to the previous page in browser history',
+    inputSchema: {
+        type: 'object' as const,
+        properties: {
+            timeout: {
+                type: 'number',
+                description: `Navigation timeout in milliseconds (default: ${NAVIGATION_TIMEOUT.DEFAULT}ms)`,
+                minimum: NAVIGATION_TIMEOUT.MIN,
+                maximum: NAVIGATION_TIMEOUT.MAX,
+                default: NAVIGATION_TIMEOUT.DEFAULT,
+            },
+            waitForSelector: {
+                type: 'string',
+                description:
+                    'Optional CSS selector to wait for before considering navigation complete',
+            },
+            waitUntil: {
+                type: 'string',
+                description: `When to consider navigation succeeded (default: "${DEFAULT_WAIT_UNTIL}")`,
+                enum: ['load', 'domcontentloaded', 'networkidle'],
+                default: DEFAULT_WAIT_UNTIL,
+            },
+        },
+        required: [],
+    },
+    async handler(
+        session: BrowserSession,
+        args: {
+            timeout?: number;
+            waitForSelector?: string;
+            waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
+        }
+    ): Promise<CallToolResult> {
+        logger.info('GoBack tool called', args);
+
+        try {
+            const page = await session.getPage();
+            logger.debug('Page obtained');
+
+            const timeout = args.timeout ?? NAVIGATION_TIMEOUT.DEFAULT;
+            const waitUntil = args.waitUntil ?? DEFAULT_WAIT_UNTIL;
+
+            logger.info('Going back in browser history', {
+                timeout,
+                waitUntil,
+            });
+
+            // Check if we can go back
+            const canGoBack = await page.evaluate(
+                () => window.history.length > 1
+            );
+            if (!canGoBack) {
+                return {
+                    content: [
+                        {
+                            type: 'text' as const,
+                            text: 'Cannot go back - no previous page in history',
+                        },
+                    ],
+                };
+            }
+
+            await page.goBack({
+                waitUntil: waitUntil as
+                    | 'load'
+                    | 'domcontentloaded'
+                    | 'networkidle'
+                    | 'commit',
+                timeout: timeout,
+            });
+            logger.info('Navigation back completed');
+
+            if (args.waitForSelector) {
+                logger.debug(`Waiting for selector: ${args.waitForSelector}`);
+                try {
+                    await page.waitForSelector(args.waitForSelector, {
+                        timeout: Math.min(timeout / 2, 10000),
+                    });
+                    logger.debug('Selector found');
+                } catch {
+                    logger.warn(
+                        `Selector "${args.waitForSelector}" not found, continuing`
+                    );
+                }
+            }
+
+            await page.waitForTimeout(2000);
+            logger.debug('Additional stabilization wait completed');
+
+            const title = await page.title();
+            const currentUrl = page.url();
+
+            return {
+                content: [
+                    {
+                        type: 'text' as const,
+                        text: `Navigated back to ${currentUrl}\nPage title: ${title}`,
+                    },
+                ],
+            };
+        } catch (error) {
+            logger.error('Go back navigation failed', error);
+            throw error;
+        }
+    },
+};

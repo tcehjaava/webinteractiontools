@@ -2,8 +2,17 @@ import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { Logger } from '../lib/logger.js';
 
-const ELEMENT_TYPES = ['all', 'buttons', 'links', 'inputs', 'clickable'] as const;
-const DEFAULT_ELEMENT_TYPE = 'clickable' as const;
+const ELEMENT_TYPES = [
+    'all',
+    'buttons',
+    'links',
+    'inputs',
+    'clickable',
+] as const;
+
+type ElementType = (typeof ELEMENT_TYPES)[number];
+
+const DEFAULT_ELEMENT_TYPE: ElementType = 'clickable';
 const DEFAULT_SCOPE = 'viewport' as const;
 const DEFAULT_PAGE = 1;
 const ELEMENTS_PER_PAGE = 20;
@@ -18,7 +27,7 @@ export const getElementsTool = {
         properties: {
             type: {
                 type: 'string',
-                enum: ['all', 'buttons', 'links', 'inputs', 'clickable'],
+                enum: ELEMENT_TYPES,
                 default: DEFAULT_ELEMENT_TYPE,
                 description: 'Type of elements to find',
             },
@@ -38,7 +47,7 @@ export const getElementsTool = {
     async handler(
         session: BrowserSession,
         args: {
-            type?: 'all' | 'buttons' | 'links' | 'inputs' | 'clickable';
+            type?: ElementType;
             scope?: 'viewport' | 'all';
             page?: number;
         }
@@ -49,21 +58,28 @@ export const getElementsTool = {
             const page = await session.getPage();
             logger.debug('Page obtained');
 
-            const elementType = args.type ?? 'clickable';
+            const elementType: ElementType = args.type ?? DEFAULT_ELEMENT_TYPE;
             const searchScope = args.scope ?? 'viewport';
             const pageNumber = args.page ?? 1;
             const elementsPerPage = ELEMENTS_PER_PAGE;
 
             const elements = await page.evaluate(
-                ({ type, scope }) => {
+                ({
+                    type,
+                    scope,
+                    validTypes,
+                }: {
+                    type: string;
+                    scope: string;
+                    validTypes: readonly string[];
+                }) => {
                     const getSelector = (type: string): string => {
-                        const validTypes = ['all', 'buttons', 'links', 'inputs', 'clickable'];
                         if (!validTypes.includes(type)) {
                             throw new Error(
                                 `Invalid element type: "${type}". Valid types are: ${validTypes.join(', ')}`
                             );
                         }
-                        
+
                         switch (type) {
                             case 'buttons':
                                 return 'button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]';
@@ -77,7 +93,9 @@ export const getElementsTool = {
                                 return '*';
                             default:
                                 // This should never be reached due to validation above
-                                throw new Error(`Unhandled element type: ${type}`);
+                                throw new Error(
+                                    `Unhandled element type: ${type}`
+                                );
                         }
                     };
 
@@ -141,7 +159,11 @@ export const getElementsTool = {
                         }
                     );
                 },
-                { type: elementType, scope: searchScope }
+                {
+                    type: elementType,
+                    scope: searchScope,
+                    validTypes: [...ELEMENT_TYPES],
+                }
             );
 
             const formatElement = (el: {

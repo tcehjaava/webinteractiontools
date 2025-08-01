@@ -7,7 +7,7 @@ import {
     CallToolResult,
 } from '@modelcontextprotocol/sdk/types.js';
 import { BrowserSession } from './lib/browser.js';
-import { navigateTool } from './tools/navigate.js';
+import { navigateTool, goBackTool } from './tools/navigate.js';
 import { screenshotTool } from './tools/screenshot.js';
 import {
     scrollToPositionTool,
@@ -52,6 +52,7 @@ const server = new Server(
 
 const tools = [
     navigateTool,
+    goBackTool,
     screenshotTool,
     scrollToPositionTool,
     scrollDirectionTool,

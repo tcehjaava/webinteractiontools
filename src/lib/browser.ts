@@ -7,8 +7,9 @@ export class BrowserSession {
 
     async getPage(headless?: boolean): Promise<Page> {
         // If headless is not specified, use the current mode
-        const useHeadless = headless !== undefined ? headless : this.currentHeadlessMode;
-        
+        const useHeadless =
+            headless !== undefined ? headless : this.currentHeadlessMode;
+
         if (!this.browser || this.currentHeadlessMode !== useHeadless) {
             if (this.browser) {
                 await this.browser.close();

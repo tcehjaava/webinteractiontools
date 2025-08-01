@@ -74,7 +74,9 @@ export const clickTextTool = {
 
                     // Count total matches in the document
                     const totalMatches = elements.filter(
-                        el => el.textContent && el.textContent.includes(text as string)
+                        el =>
+                            el.textContent &&
+                            el.textContent.includes(text as string)
                     ).length;
 
                     return {
