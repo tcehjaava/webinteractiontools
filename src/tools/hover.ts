@@ -65,7 +65,7 @@ export const hoverTextTool = {
                                 const rect = element.getBoundingClientRect();
                                 const x = rect.left + rect.width / 2;
                                 const y = rect.top + rect.height / 2;
-                                
+
                                 // Dispatch mousemove first to simulate cursor movement
                                 const mousemoveEvent = new MouseEvent(
                                     'mousemove',
@@ -156,9 +156,12 @@ export const hoverTextTool = {
                 }
             } catch (e) {
                 // If native hover fails, continue with synthetic events approach
-                logger.debug('Native hover failed, continuing with synthetic events', e);
+                logger.debug(
+                    'Native hover failed, continuing with synthetic events',
+                    e
+                );
             }
-            
+
             await page.waitForTimeout(waitAfter);
             logger.info('Hover completed');
 
@@ -283,7 +286,10 @@ export const hoverPositionTool = {
             try {
                 await page.mouse.move(args.x, args.y);
             } catch (e) {
-                logger.debug('Native mouse move failed, continuing with synthetic events', e);
+                logger.debug(
+                    'Native mouse move failed, continuing with synthetic events',
+                    e
+                );
             }
 
             await page.waitForTimeout(waitAfter);
@@ -389,7 +395,7 @@ export const hoverSelectorTool = {
                                 const rect = element.getBoundingClientRect();
                                 const x = rect.left + rect.width / 2;
                                 const y = rect.top + rect.height / 2;
-                                
+
                                 // Dispatch mousemove first to simulate cursor movement
                                 const mousemoveEvent = new MouseEvent(
                                     'mousemove',
@@ -462,7 +468,10 @@ export const hoverSelectorTool = {
                     await element.hover();
                 }
             } catch (e) {
-                logger.debug('Native hover failed, continuing with synthetic events', e);
+                logger.debug(
+                    'Native hover failed, continuing with synthetic events',
+                    e
+                );
             }
 
             await page.waitForTimeout(waitAfter);

@@ -2,41 +2,38 @@ import type { BrowserSession } from '../lib/browser.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { Logger } from '../lib/logger.js';
 
-const DEFAULT_SELECTOR = 'body';
-const DEFAULT_CLEAN = true;
-const DEFAULT_VIEWPORT = false;
+const DEFAULT_OCCURRENCE = 1;
 
 const logger = new Logger('extractHTML');
 
+const ELEMENTS_TO_REMOVE =
+    'script, style, noscript, .sr-only, .visually-hidden, [hidden], [style*="display: none"], [style*="display:none"], [aria-hidden="true"]';
+
 export const extractHTMLTool = {
     name: 'extractHTML',
-    description: 'Extract HTML content from the page or specific elements',
+    description:
+        'Extract cleaned HTML content from elements containing specific text',
     inputSchema: {
         type: 'object' as const,
         properties: {
-            selector: {
+            text: {
                 type: 'string',
-                description: `CSS selector (default: ${DEFAULT_SELECTOR})`,
-                default: DEFAULT_SELECTOR,
+                description: 'Text to find and extract HTML from',
             },
-            clean: {
-                type: 'boolean',
-                description: 'Remove scripts, styles, and hidden elements',
-                default: DEFAULT_CLEAN,
-            },
-            viewport: {
-                type: 'boolean',
-                description: 'Only extract visible viewport content',
-                default: DEFAULT_VIEWPORT,
+            occurrence: {
+                type: 'number',
+                description:
+                    'Which occurrence to extract if multiple matches (1-based)',
+                default: DEFAULT_OCCURRENCE,
             },
         },
+        required: ['text'],
     },
     async handler(
         session: BrowserSession,
         args: {
-            selector?: string;
-            clean?: boolean;
-            viewport?: boolean;
+            text: string;
+            occurrence?: number;
         }
     ): Promise<CallToolResult> {
         logger.info('Tool called', args);
@@ -45,130 +42,156 @@ export const extractHTMLTool = {
             const page = await session.getPage();
             logger.debug('Page obtained');
 
-            const selector = args.selector ?? DEFAULT_SELECTOR;
-            const clean = args.clean ?? true;
-            const viewport = args.viewport ?? false;
+            const occurrence = args.occurrence ?? DEFAULT_OCCURRENCE;
 
-            let html: string;
+            const result = await page.evaluate(
+                ({ text, occurrence, elementsToRemove }) => {
+                    const IGNORED_TAGS = ['SCRIPT', 'STYLE'];
 
-            if (viewport) {
-                html = await page.evaluate(
-                    ({ selector, clean }) => {
-                        const viewportHeight = window.innerHeight;
-                        const elements = Array.from(
-                            document.querySelectorAll(selector)
+                    const hasDirectTextContent = (
+                        element: Element,
+                        searchText: string
+                    ): boolean => {
+                        return Array.from(element.childNodes).some(
+                            node =>
+                                node.nodeType === Node.TEXT_NODE &&
+                                node.textContent &&
+                                node.textContent.includes(searchText)
+                        );
+                    };
+
+                    const getDepth = (el: Element): number => {
+                        let depth = 0;
+                        let current = el.parentElement;
+                        while (current) {
+                            depth++;
+                            current = current.parentElement;
+                        }
+                        return depth;
+                    };
+
+                    const cleanElement = (
+                        element: HTMLElement
+                    ): HTMLElement => {
+                        const clone = element.cloneNode(true) as HTMLElement;
+                        clone
+                            .querySelectorAll(elementsToRemove)
+                            .forEach(el => el.remove());
+
+                        const walker = document.createTreeWalker(
+                            clone,
+                            NodeFilter.SHOW_TEXT,
+                            {
+                                acceptNode: node => {
+                                    return node.textContent?.trim()
+                                        ? NodeFilter.FILTER_SKIP
+                                        : NodeFilter.FILTER_ACCEPT;
+                                },
+                            }
                         );
 
-                        const visibleElements = elements.filter(element => {
-                            const rect = element.getBoundingClientRect();
-                            return (
-                                rect.bottom > 0 &&
-                                rect.top < viewportHeight &&
-                                rect.height > 0
-                            );
-                        });
+                        const nodesToRemove: Node[] = [];
+                        let currentNode;
+                        while ((currentNode = walker.nextNode())) {
+                            nodesToRemove.push(currentNode);
+                        }
+                        nodesToRemove.forEach(node =>
+                            node.parentNode?.removeChild(node)
+                        );
 
-                        if (visibleElements.length === 0) {
-                            return '';
+                        return clone;
+                    };
+
+                    const matchingElements: Array<{
+                        element: Element;
+                        depth: number;
+                    }> = [];
+                    const allElements = document.querySelectorAll('*');
+
+                    for (const element of Array.from(allElements)) {
+                        if (IGNORED_TAGS.includes(element.tagName)) {
+                            continue;
                         }
 
-                        const container = document.createElement('div');
-                        visibleElements.forEach(el => {
-                            const clone = el.cloneNode(true) as HTMLElement;
-                            if (clean) {
-                                clone
-                                    .querySelectorAll('script, style, noscript')
-                                    .forEach(el => el.remove());
-                                clone
-                                    .querySelectorAll(
-                                        '[style*="display: none"]'
-                                    )
-                                    .forEach(el => el.remove());
-                                clone
-                                    .querySelectorAll('[hidden]')
-                                    .forEach(el => el.remove());
-                            }
-                            container.appendChild(clone);
-                        });
-
-                        return container.innerHTML;
-                    },
-                    { selector, clean }
-                );
-            } else {
-                html = await page.evaluate(
-                    ({ selector, clean }) => {
-                        const elements = document.querySelectorAll(selector);
-                        if (elements.length === 0) {
-                            return '';
-                        }
-
-                        if (elements.length === 1) {
-                            const element = elements[0] as HTMLElement;
-                            if (clean) {
-                                const clone = element.cloneNode(
-                                    true
-                                ) as HTMLElement;
-                                clone
-                                    .querySelectorAll('script, style, noscript')
-                                    .forEach(el => el.remove());
-                                clone
-                                    .querySelectorAll(
-                                        '[style*="display: none"]'
-                                    )
-                                    .forEach(el => el.remove());
-                                clone
-                                    .querySelectorAll('[hidden]')
-                                    .forEach(el => el.remove());
-                                return clone.outerHTML;
-                            }
-                            return element.outerHTML;
-                        } else {
-                            const container = document.createElement('div');
-                            elements.forEach(el => {
-                                const clone = el.cloneNode(true) as HTMLElement;
-                                if (clean) {
-                                    clone
-                                        .querySelectorAll(
-                                            'script, style, noscript'
-                                        )
-                                        .forEach(el => el.remove());
-                                    clone
-                                        .querySelectorAll(
-                                            '[style*="display: none"]'
-                                        )
-                                        .forEach(el => el.remove());
-                                    clone
-                                        .querySelectorAll('[hidden]')
-                                        .forEach(el => el.remove());
-                                }
-                                container.appendChild(clone);
+                        const elementText = element.textContent?.trim();
+                        if (
+                            hasDirectTextContent(element, text as string) ||
+                            elementText === text
+                        ) {
+                            matchingElements.push({
+                                element,
+                                depth: getDepth(element),
                             });
-                            return container.innerHTML;
                         }
-                    },
-                    { selector, clean }
-                );
-            }
+                    }
 
-            const elementCount = await page.evaluate(
-                selector => document.querySelectorAll(selector).length,
-                selector
+                    if (matchingElements.length === 0) {
+                        return {
+                            html: '',
+                            count: 0,
+                            found: false,
+                            tagName: null,
+                            id: null,
+                            className: null,
+                        };
+                    }
+
+                    matchingElements.sort((a, b) => b.depth - a.depth);
+
+                    if (occurrence > matchingElements.length) {
+                        return {
+                            html: '',
+                            count: matchingElements.length,
+                            found: false,
+                            tagName: null,
+                            id: null,
+                            className: null,
+                        };
+                    }
+
+                    const match = matchingElements[occurrence - 1];
+                    const targetElement = match.element as HTMLElement;
+                    const cleanedElement = cleanElement(targetElement);
+
+                    return {
+                        html: cleanedElement.outerHTML,
+                        count: matchingElements.length,
+                        found: true,
+                        tagName: targetElement.tagName,
+                        id: targetElement.id || '',
+                        className: targetElement.className || '',
+                    };
+                },
+                {
+                    text: args.text,
+                    occurrence,
+                    elementsToRemove: ELEMENTS_TO_REMOVE,
+                }
             );
 
+            if (!result.found) {
+                if (result.count === 0) {
+                    throw new Error(
+                        `No element found containing text: "${args.text}"`
+                    );
+                } else {
+                    throw new Error(
+                        `Element occurrence ${occurrence} not found. Only ${result.count} matches found for text: "${args.text}"`
+                    );
+                }
+            }
+
             const info = [
-                `Selector: ${selector}`,
-                `Elements found: ${elementCount}`,
-                `Clean mode: ${clean}`,
-                `Viewport only: ${viewport}`,
-                `HTML length: ${html.length} characters`,
+                `Found text: "${args.text}" (occurrence ${occurrence} of ${result.count})`,
+                `Element: <${result.tagName}${result.id ? ` id="${result.id}"` : ''}${result.className ? ` class="${result.className}"` : ''}>`,
+                `HTML length: ${result.html.length} characters`,
             ].join('\n');
 
             return {
                 content: [
                     {
                         type: 'text' as const,
-                        text: `${info}\n\n${html}`,
+                        text: `${info}\n\n${result.html}`,
                     },
                 ],
             };
