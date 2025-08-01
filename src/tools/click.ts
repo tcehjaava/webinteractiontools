@@ -51,39 +51,43 @@ export const clickTextTool = {
 
             const clicked = await page.evaluate(
                 ({ text, occurrence }) => {
-                    // Constants
-                    const CLICKABLE_TAGS = ['a', 'button', 'input', 'select', 'textarea', 'label'];
-                    const CLICKABLE_ROLES = ['button', 'link', 'tab', 'menuitem'];
+                    const CLICKABLE_TAGS = [
+                        'a',
+                        'button',
+                        'input',
+                        'select',
+                        'textarea',
+                        'label',
+                    ];
+                    const CLICKABLE_ROLES = [
+                        'button',
+                        'link',
+                        'tab',
+                        'menuitem',
+                    ];
                     const IGNORED_TAGS = ['SCRIPT', 'STYLE'];
 
-                    // Helper function to check if element is clickable
                     const isClickable = (el: Element): boolean => {
                         const tagName = el.tagName.toLowerCase();
-                        
-                        // Check if it's an inherently clickable tag
+
                         if (CLICKABLE_TAGS.includes(tagName)) return true;
-                        
-                        // Check HTML element specific attributes
+
                         if (el instanceof HTMLElement) {
-                            // Check for click handlers
                             if (el.onclick !== null) return true;
-                            
-                            // Check for clickable ARIA roles
+
                             const role = el.getAttribute('role');
-                            if (role && CLICKABLE_ROLES.includes(role)) return true;
-                            
-                            // Check if element is focusable
+                            if (role && CLICKABLE_ROLES.includes(role))
+                                return true;
+
                             if (el.hasAttribute('tabindex')) return true;
-                            
-                            // Check if cursor indicates clickability
+
                             const computedStyle = window.getComputedStyle(el);
                             if (computedStyle.cursor === 'pointer') return true;
                         }
-                        
+
                         return false;
                     };
 
-                    // Helper function to get element depth in DOM tree
                     const getDepth = (el: Element): number => {
                         let depth = 0;
                         let current = el.parentElement;
@@ -94,34 +98,38 @@ export const clickTextTool = {
                         return depth;
                     };
 
-                    // Helper function to check if element directly contains text
-                    const hasDirectTextContent = (element: Element, searchText: string): boolean => {
+                    const hasDirectTextContent = (
+                        element: Element,
+                        searchText: string
+                    ): boolean => {
                         return Array.from(element.childNodes).some(
-                            node => node.nodeType === Node.TEXT_NODE && 
-                                   node.textContent && 
-                                   node.textContent.includes(searchText)
+                            node =>
+                                node.nodeType === Node.TEXT_NODE &&
+                                node.textContent &&
+                                node.textContent.includes(searchText)
                         );
                     };
 
-                    // Find the best clickable element for given text element
-                    const findClickableElement = (textElement: Element): Element => {
-                        // If the element itself is clickable, use it
+                    const findClickableElement = (
+                        textElement: Element
+                    ): Element => {
                         if (isClickable(textElement)) {
                             return textElement;
                         }
 
-                        // Check if any child is clickable and contains the text
-                        const clickableChild = Array.from(textElement.querySelectorAll('*')).find(
-                            child => child.textContent && 
-                                    child.textContent.includes(text as string) && 
-                                    isClickable(child)
+                        const clickableChild = Array.from(
+                            textElement.querySelectorAll('*')
+                        ).find(
+                            child =>
+                                child.textContent &&
+                                child.textContent.includes(text as string) &&
+                                isClickable(child)
                         );
-                        
+
                         if (clickableChild) {
                             return clickableChild;
                         }
 
-                        // Check parent elements for clickability
                         let parent = textElement.parentElement;
                         while (parent && parent !== document.body) {
                             if (isClickable(parent)) {
@@ -130,19 +138,38 @@ export const clickTextTool = {
                             parent = parent.parentElement;
                         }
 
-                        // Return original element if no clickable element found
                         return textElement;
                     };
 
-                    // Helper function to perform the click action
                     const performClick = (element: HTMLElement): void => {
-                        // Try native click first
+                        if (element.tagName === 'A' || element.closest('a')) {
+                            const linkElement =
+                                element.tagName === 'A'
+                                    ? element
+                                    : element.closest('a');
+                            if (linkElement) {
+                                linkElement.removeAttribute('target');
+                                window.open = function (
+                                    url?: string | URL,
+                                    _target?: string,
+                                    _features?: string
+                                ): Window | null {
+                                    if (url) {
+                                        window.location.href =
+                                            typeof url === 'string'
+                                                ? url
+                                                : url.toString();
+                                    }
+                                    return null;
+                                };
+                            }
+                        }
+
                         if (typeof element.click === 'function') {
                             element.click();
                             return;
                         }
 
-                        // Fallback to MouseEvent
                         const rect = element.getBoundingClientRect();
                         const clickEvent = new MouseEvent('click', {
                             view: window,
@@ -154,27 +181,29 @@ export const clickTextTool = {
                         element.dispatchEvent(clickEvent);
                     };
 
-                    // Find all elements containing the text
-                    const matchingElements: Array<{element: Element, depth: number}> = [];
+                    const matchingElements: Array<{
+                        element: Element;
+                        depth: number;
+                    }> = [];
                     const allElements = document.querySelectorAll('*');
-                    
+
                     for (const element of Array.from(allElements)) {
-                        // Skip ignored elements
                         if (IGNORED_TAGS.includes(element.tagName)) {
                             continue;
                         }
 
-                        // Check if element contains the search text
                         const elementText = element.textContent?.trim();
-                        if (hasDirectTextContent(element, text as string) || elementText === text) {
+                        if (
+                            hasDirectTextContent(element, text as string) ||
+                            elementText === text
+                        ) {
                             matchingElements.push({
                                 element,
-                                depth: getDepth(element)
+                                depth: getDepth(element),
                             });
                         }
                     }
 
-                    // No matches found
                     if (matchingElements.length === 0) {
                         return {
                             clicked: false,
@@ -185,10 +214,8 @@ export const clickTextTool = {
                         };
                     }
 
-                    // Sort by depth (deepest first) to prioritize more specific elements
                     matchingElements.sort((a, b) => b.depth - a.depth);
 
-                    // Check if requested occurrence exists
                     if (occurrence > matchingElements.length) {
                         return {
                             clicked: false,
@@ -199,15 +226,13 @@ export const clickTextTool = {
                         };
                     }
 
-                    // Get the target element based on occurrence
                     const match = matchingElements[occurrence - 1];
                     const targetElement = findClickableElement(match.element);
 
-                    // Perform the click if element is HTMLElement
                     if (targetElement instanceof HTMLElement) {
                         try {
                             performClick(targetElement);
-                            
+
                             return {
                                 clicked: true,
                                 totalMatches: matchingElements.length,
@@ -215,10 +240,11 @@ export const clickTextTool = {
                                 className: targetElement.className || '',
                                 id: targetElement.id || '',
                             };
-                        } catch (error) {
-                            // Last resort: dispatch a basic click event
-                            targetElement.dispatchEvent(new Event('click', { bubbles: true }));
-                            
+                        } catch {
+                            targetElement.dispatchEvent(
+                                new Event('click', { bubbles: true })
+                            );
+
                             return {
                                 clicked: true,
                                 totalMatches: matchingElements.length,
@@ -229,7 +255,6 @@ export const clickTextTool = {
                         }
                     }
 
-                    // Should not reach here, but return failure as safety
                     return {
                         clicked: false,
                         totalMatches: matchingElements.length,
@@ -328,6 +353,29 @@ export const clickPositionTool = {
                             textTruncateLength
                         ),
                     };
+
+                    if (element.tagName === 'A' || element.closest('a')) {
+                        const linkElement =
+                            element.tagName === 'A'
+                                ? element
+                                : element.closest('a');
+                        if (linkElement) {
+                            linkElement.removeAttribute('target');
+                            window.open = function (
+                                url?: string | URL,
+                                _target?: string,
+                                _features?: string
+                            ): Window | null {
+                                if (url) {
+                                    window.location.href =
+                                        typeof url === 'string'
+                                            ? url
+                                            : url.toString();
+                                }
+                                return null;
+                            };
+                        }
+                    }
 
                     try {
                         if (
@@ -469,6 +517,32 @@ export const clickSelectorTool = {
                                         textTruncateLength
                                     ),
                                 };
+
+                                if (
+                                    element.tagName === 'A' ||
+                                    element.closest('a')
+                                ) {
+                                    const linkElement =
+                                        element.tagName === 'A'
+                                            ? element
+                                            : element.closest('a');
+                                    if (linkElement) {
+                                        linkElement.removeAttribute('target');
+                                        window.open = function (
+                                            url?: string | URL,
+                                            _target?: string,
+                                            _features?: string
+                                        ): Window | null {
+                                            if (url) {
+                                                window.location.href =
+                                                    typeof url === 'string'
+                                                        ? url
+                                                        : url.toString();
+                                            }
+                                            return null;
+                                        };
+                                    }
+                                }
 
                                 element.click();
 
