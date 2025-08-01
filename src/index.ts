@@ -19,6 +19,11 @@ import {
     clickPositionTool,
     clickSelectorTool,
 } from './tools/click.js';
+import {
+    hoverTextTool,
+    hoverPositionTool,
+    hoverSelectorTool,
+} from './tools/hover.js';
 import { getElementsTool } from './tools/getElements.js';
 import { extractHTMLTool } from './tools/extractHTML.js';
 
@@ -60,6 +65,9 @@ const tools = [
     clickTextTool,
     clickPositionTool,
     clickSelectorTool,
+    hoverTextTool,
+    hoverPositionTool,
+    hoverSelectorTool,
     getElementsTool,
     extractHTMLTool,
 ] as const;
