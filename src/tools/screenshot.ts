@@ -14,8 +14,7 @@ export const screenshotTool = {
         properties: {},
         required: [],
     },
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    async handler(session: BrowserSession, _args: {}): Promise<CallToolResult> {
+    async handler(session: BrowserSession, _args: Record<string, never>): Promise<CallToolResult> {
         logger.info('Tool called');
 
         try {
