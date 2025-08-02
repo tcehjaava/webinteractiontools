@@ -30,10 +30,14 @@ claude mcp add websight "websight"
 
 ## Local Development
 
-### Install
+### Setup
 
 ```bash
+# Install dependencies
 npm install
+
+# Build the project
+npm run build
 ```
 
 ### Development Scripts
@@ -58,7 +62,11 @@ npm run check
 ### Add to Claude Code (Development)
 
 ```bash
-claude mcp add websight "node $(pwd)/dist/index.js"
+# Remove if already exists
+claude mcp remove websight
+
+# Add the server
+claude mcp add websight node dist/index.js
 ```
 
 ### Remove from Claude Code

@@ -27,6 +27,7 @@ import {
 } from './tools/hover.js';
 import { getElementsTool } from './tools/getElements.js';
 import { extractHTMLTool } from './tools/extractHTML.js';
+import { fillTextTool, fillSelectorTool, fillFormTool } from './tools/fill.js';
 
 interface Tool {
     name: string;
@@ -71,6 +72,9 @@ const tools = [
     hoverSelectorTool,
     getElementsTool,
     extractHTMLTool,
+    fillTextTool,
+    fillSelectorTool,
+    fillFormTool,
 ] as const;
 
 server.setRequestHandler(
