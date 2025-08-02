@@ -1,4 +1,4 @@
-# WebInteractionTools
+# 🦉 WebInteractionTools
 
 MCP server that gives AI agents web browsing capabilities via Playwright.
 
