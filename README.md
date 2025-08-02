@@ -29,6 +29,16 @@ After installing globally, add it to Claude Code as an MCP server:
 claude mcp add webinteractiontools "webinteractiontools"
 ```
 
+## Troubleshooting
+
+If you have trouble connecting to the MCP server, you can start it manually by running:
+
+```bash
+webinteractiontools
+```
+
+This will start the server automatically, which can help if Claude Code can't manage the server on its own.
+
 ## Local Development
 
 ### Setup
