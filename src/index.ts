@@ -28,6 +28,7 @@ import {
 import { getElementsTool } from './tools/getElements.js';
 import { extractHTMLTool } from './tools/extractHTML.js';
 import { fillTextTool, fillSelectorTool, fillFormTool } from './tools/fill.js';
+import { executeJavaScriptTool } from './tools/executeJavaScript.js';
 
 interface Tool {
     name: string;
@@ -75,6 +76,7 @@ const tools = [
     fillTextTool,
     fillSelectorTool,
     fillFormTool,
+    executeJavaScriptTool,
 ] as const;
 
 server.setRequestHandler(
