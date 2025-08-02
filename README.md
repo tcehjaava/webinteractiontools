@@ -1,6 +1,6 @@
-# 🦉 WebSight
+# 🦉 WebInteractionTools
 
-WebSight is a Model Context Protocol (MCP) server that provides web browsing capabilities to AI agents. Built on Playwright, it enables automated web interactions including navigation, clicking, scrolling, taking screenshots, and extracting content.
+WebInteractionTools is a Model Context Protocol (MCP) server that provides web browsing capabilities to AI agents. Built on Playwright, it enables automated web interactions including navigation, clicking, scrolling, taking screenshots, and extracting content.
 
 ## Available Tools
 
@@ -18,7 +18,7 @@ WebSight is a Model Context Protocol (MCP) server that provides web browsing cap
 ### Global Installation
 
 ```bash
-npm install -g @tcehjaava/websight
+npm install -g @tcehjaava/webinteractiontools
 ```
 
 ### Add to Claude Code
@@ -26,7 +26,7 @@ npm install -g @tcehjaava/websight
 After installing globally, add it to Claude Code as an MCP server:
 
 ```bash
-claude mcp add websight "websight"
+claude mcp add webinteractiontools "webinteractiontools"
 ```
 
 ## Local Development
@@ -64,14 +64,14 @@ npm run check
 
 ```bash
 # Remove if already exists
-claude mcp remove websight
+claude mcp remove webinteractiontools
 
 # Add the server
-claude mcp add websight node dist/index.js
+claude mcp add webinteractiontools node dist/index.js
 ```
 
 ### Remove from Claude Code
 
 ```bash
-claude mcp remove websight
+claude mcp remove webinteractiontools
 ```

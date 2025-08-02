@@ -47,7 +47,7 @@ const browserSession = new BrowserSession();
 
 const server = new Server(
     {
-        name: 'websight',
+        name: 'webinteractiontools',
         version: '0.1.0',
     },
     {

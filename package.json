@@ -1,11 +1,11 @@
 {
-    "name": "@tcehjaava/websight",
+    "name": "@tcehjaava/webinteractiontools",
     "version": "0.1.2",
     "description": "Web browsing capabilities for AI agents via MCP",
     "main": "dist/index.js",
     "type": "module",
     "bin": {
-        "websight": "./dist/index.js"
+        "webinteractiontools": "./dist/index.js"
     },
     "scripts": {
         "dev": "tsx watch src/index.ts",
@@ -31,12 +31,12 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/tcehjaava/websight.git"
+        "url": "git+https://github.com/tcehjaava/webinteractiontools.git"
     },
     "bugs": {
-        "url": "https://github.com/tcehjaava/websight/issues"
+        "url": "https://github.com/tcehjaava/webinteractiontools/issues"
     },
-    "homepage": "https://github.com/tcehjaava/websight#readme",
+    "homepage": "https://github.com/tcehjaava/webinteractiontools#readme",
     "files": [
         "dist/",
         "README.md",
