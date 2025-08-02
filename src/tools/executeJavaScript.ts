@@ -19,7 +19,8 @@ Usage notes:
         properties: {
             code: {
                 type: 'string',
-                description: 'JavaScript code to execute. Can be an expression or statement(s).',
+                description:
+                    'JavaScript code to execute. Can be an expression or statement(s).',
             },
         },
         required: ['code'],
@@ -34,7 +35,7 @@ Usage notes:
             const page = await session.getPage();
             logger.debug('Page obtained');
 
-            const result = await page.evaluate((code) => {
+            const result = await page.evaluate(code => {
                 try {
                     const fn = new Function('return ' + code);
                     const result = fn();
@@ -55,7 +56,10 @@ Usage notes:
                     } catch (innerError) {
                         return {
                             success: false,
-                            error: innerError instanceof Error ? innerError.message : String(innerError),
+                            error:
+                                innerError instanceof Error
+                                    ? innerError.message
+                                    : String(innerError),
                         };
                     }
                 }

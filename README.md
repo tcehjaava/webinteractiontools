@@ -1,17 +1,20 @@
 # 🦉 WebInteractionTools
 
-WebInteractionTools is a Model Context Protocol (MCP) server that provides web browsing capabilities to AI agents. Built on Playwright, it enables automated web interactions including navigation, clicking, scrolling, taking screenshots, and extracting content.
+WebInteractionTools is a Model Context Protocol (MCP) server that provides web browsing capabilities to AI agents. Built on Playwright, it enables automated web interactions including navigation, scrolling, taking screenshots, and executing JavaScript code.
 
 ## Available Tools
 
 - **Navigation**: Navigate to URLs and go back in browser history
+  - `navigate`: Navigate to a URL with customizable timeout, wait conditions, and headless mode
+  - `goBack`: Navigate back to the previous page in browser history
 - **Screenshots**: Capture screenshots of the current viewport
-- **Scrolling**: Scroll to specific positions, directions, or text content
-- **Clicking**: Click on elements by text, position, or CSS selector
-- **Hovering**: Hover over elements by text, position, or CSS selector
-- **Fill**: Fill form inputs with text values
-- **Element Discovery**: Get clickable elements in the viewport
-- **Content Extraction**: Extract cleaned HTML content from specific elements
+  - `screenshot`: Take a screenshot of the visible viewport with metadata about scroll position
+- **Scrolling**: Advanced scrolling capabilities
+  - `scrollToPosition`: Scroll to a specific Y coordinate on the page
+  - `scrollDirection`: Scroll the page up, down, to top, or to bottom
+  - `scrollToText`: Find and scroll to an element containing specific text
+- **JavaScript Execution**: Execute custom JavaScript code on the page
+  - `executeJavaScript`: Run JavaScript code and get the result back
 
 ## Installation
 
