@@ -7,6 +7,9 @@
     "bin": {
         "webinteractiontools": "./dist/index.js"
     },
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "dev": "tsx watch src/index.ts",
         "build": "tsc",
