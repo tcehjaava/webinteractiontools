@@ -25,7 +25,7 @@ npm install -g @tcehjaava/websight
 After installing globally, add it to Claude Code as an MCP server:
 
 ```bash
-claude mcp add websight
+claude mcp add websight "websight"
 ```
 
 ## Local Development
