@@ -9,6 +9,7 @@ WebSight is a Model Context Protocol (MCP) server that provides web browsing cap
 - **Scrolling**: Scroll to specific positions, directions, or text content
 - **Clicking**: Click on elements by text, position, or CSS selector
 - **Hovering**: Hover over elements by text, position, or CSS selector
+- **Fill**: Fill form inputs with text values
 - **Element Discovery**: Get clickable elements in the viewport
 - **Content Extraction**: Extract cleaned HTML content from specific elements
 
