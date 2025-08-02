@@ -1,4 +1,4 @@
-# WebSight
+# 🦉 WebSight
 
 WebSight is a Model Context Protocol (MCP) server that provides web browsing capabilities to AI agents. Built on Playwright, it enables automated web interactions including navigation, clicking, scrolling, taking screenshots, and extracting content.
 
