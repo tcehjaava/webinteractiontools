@@ -15,19 +15,6 @@ import {
     scrollDirectionTool,
     scrollToTextTool,
 } from './tools/scroll.js';
-import {
-    clickTextTool,
-    clickPositionTool,
-    clickSelectorTool,
-} from './tools/click.js';
-import {
-    hoverTextTool,
-    hoverPositionTool,
-    hoverSelectorTool,
-} from './tools/hover.js';
-import { getElementsTool } from './tools/getElements.js';
-import { extractHTMLTool } from './tools/extractHTML.js';
-import { fillTextTool, fillSelectorTool, fillFormTool } from './tools/fill.js';
 import { executeJavaScriptTool } from './tools/executeJavaScript.js';
 
 interface Tool {
@@ -65,17 +52,6 @@ const tools = [
     scrollToPositionTool,
     scrollDirectionTool,
     scrollToTextTool,
-    clickTextTool,
-    clickPositionTool,
-    clickSelectorTool,
-    hoverTextTool,
-    hoverPositionTool,
-    hoverSelectorTool,
-    getElementsTool,
-    extractHTMLTool,
-    fillTextTool,
-    fillSelectorTool,
-    fillFormTool,
     executeJavaScriptTool,
 ] as const;
 
