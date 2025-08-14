@@ -1,3 +1,5 @@
+[![MSeeP.ai Security Assessment Badge](https://mseep.net/pr/tcehjaava-webinteractiontools-badge.png)](https://mseep.ai/app/tcehjaava-webinteractiontools)
+
 # 🦉 WebInteractionTools
 
 MCP server that gives AI agents web browsing capabilities via Playwright.
